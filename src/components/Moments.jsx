@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { moments, categories } from '../data.js'
+import SlotImage, { hasImage } from './SlotImage.jsx'
 import { mono, alexandria, manrope, arNum } from '../utils.js'
 
 export default function Moments({ lang }) {
@@ -59,8 +60,12 @@ export default function Moments({ lang }) {
                 <p style={{ fontSize: 14.5, lineHeight: 1.8, color: '#4A4437', margin: '0 0 12px', maxWidth: '62ch' }}>{en ? m.dEn : m.dAr}</p>
                 <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.1em', color: '#9A8F79', border: '1px solid rgba(20,18,14,.14)', padding: '4px 9px', borderRadius: 2, direction: 'ltr' }}>SOURCE · {m.src}</span>
               </div>
-              <div aria-hidden="true" style={{ flex: '0 0 clamp(110px,14vw,210px)', minHeight: 110, borderRadius: 2, backgroundColor: '#E6DCC7', backgroundImage: 'repeating-linear-gradient(135deg,rgba(11,58,40,.14) 0 2px,transparent 2px 11px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, textAlign: 'center' }}>
-                <span style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '.1em', color: '#8D836E', direction: 'ltr' }}>{m.img}</span>
+              <div style={{ flex: '0 0 clamp(110px,14vw,210px)', minHeight: 110, position: 'relative', overflow: 'hidden', borderRadius: 2, backgroundColor: '#E6DCC7', backgroundImage: 'repeating-linear-gradient(135deg,rgba(11,58,40,.14) 0 2px,transparent 2px 11px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, textAlign: 'center' }}>
+                {hasImage(`m-${m.id}`) ? (
+                  <SlotImage slot={`m-${m.id}`} alt={m.en} />
+                ) : (
+                  <span aria-hidden="true" style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '.1em', color: '#8D836E', direction: 'ltr' }}>{m.img}</span>
+                )}
               </div>
             </article>
           ))}

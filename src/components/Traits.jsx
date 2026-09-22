@@ -1,4 +1,5 @@
 import { traits } from '../data.js'
+import SlotImage, { hasImage } from './SlotImage.jsx'
 import { mono, alexandria, manrope, arNum } from '../utils.js'
 
 export default function Traits({ lang }) {
@@ -25,9 +26,13 @@ export default function Traits({ lang }) {
               style={{ flex: t.flex, minWidth: 'min(100%,320px)', position: 'relative', borderRadius: 4, overflow: 'hidden', background: '#0B3A28', color: '#F7F3EA', minHeight: 'clamp(340px,44vh,520px)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', cursor: 'default' }}
             >
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg,rgba(247,243,234,.09) 0 2px,transparent 2px 12px)', backgroundColor: '#123F2C' }} />
-              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.42)', border: '1px dashed rgba(247,243,234,.25)', padding: '7px 12px', borderRadius: 2, direction: 'ltr' }}>{t.img}</span>
-              </div>
+              {hasImage(`trait-${t.id}`) ? (
+                <SlotImage slot={`trait-${t.id}`} alt={t.en} />
+              ) : (
+                <div aria-hidden="true" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.42)', border: '1px dashed rgba(247,243,234,.25)', padding: '7px 12px', borderRadius: 2, direction: 'ltr' }}>{t.img}</span>
+                </div>
+              )}
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg,rgba(4,26,17,.94) 0%,rgba(4,26,17,.62) 38%,rgba(4,26,17,.08) 100%)' }} />
               <div style={{ position: 'relative', padding: 'clamp(22px,2.4vw,34px)' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 10 }}>

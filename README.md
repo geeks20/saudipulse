@@ -38,6 +38,16 @@ npm start        # production: migrate + serve API and dist/ on one port
 The nav EN/AR toggle switches body copy language for traits, region details,
 and timeline descriptions.
 
+## Imagery
+
+Section imagery is curated from **Wikimedia Commons** (`src/images.js`) —
+hand-picked photos of the actual landmarks (Hegra, Masmak, Rijal Almaa,
+At-Turaif, Jubbah rock art, …), hotlinked at display resolution with the
+CC/PD credit rendered on each image as the licenses require. Slots without
+a worthy match (e.g. Tabuk, Najran, a few timeline moments) fall back to
+the design's styled placeholder. To swap or add an image, edit the slot's
+entry in `src/images.js` (`trait-<id>`, `region-<id>`, `m-<moment id>`).
+
 ## Backend
 
 Express server (`server/index.js`) on Neon Postgres:

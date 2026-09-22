@@ -152,6 +152,9 @@ export const moments = [
   { y: '2026', cat: 'society', ar: 'اليوم الوطني السعودي ٩٦', en: '96th Saudi National Day', dAr: 'ستة وتسعون عاماً، وحكايةٌ ما زالت تُروى.', dEn: 'Ninety-six years, and a story still being told.', src: 'SPA', img: 'FLAG AGAINST EVENING SKY' },
 ]
 
+// stable ids for image slots (year alone collides for 2024/2026)
+moments.forEach((m) => { m.id = m.y + (m.y === '2024' || m.y === '2026' ? '-' + m.cat : '') })
+
 export const categories = [
   { key: 'all', ar: 'الكل', en: 'ALL' }, { key: 'foundation', ar: 'التأسيس', en: 'FOUNDATION' },
   { key: 'culture', ar: 'الثقافة', en: 'CULTURE' }, { key: 'heritage', ar: 'التراث', en: 'HERITAGE' },

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MapSvg from '../MapSvg.jsx'
 import { regions } from '../data.js'
+import SlotImage, { hasImage } from './SlotImage.jsx'
 import { ACCENT, mono, alexandria, manrope } from '../utils.js'
 
 export default function Regions({ geo, lang }) {
@@ -23,8 +24,12 @@ export default function Regions({ geo, lang }) {
           <aside style={{ flex: '1 1 min(100%,380px)', minWidth: 'min(100%,320px)' }}>
             {active && (
               <div key={active.id} style={{ animation: 'sp-fade .5s ease both' }}>
-                <div aria-hidden="true" style={{ position: 'relative', height: 'clamp(150px,20vh,210px)', borderRadius: 3, overflow: 'hidden', backgroundColor: '#0E4530', backgroundImage: 'repeating-linear-gradient(135deg,rgba(247,243,234,.08) 0 2px,transparent 2px 12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 22 }}>
-                  <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.45)', border: '1px dashed rgba(247,243,234,.25)', padding: '7px 12px', direction: 'ltr' }}>{active.img}</span>
+                <div style={{ position: 'relative', height: 'clamp(150px,20vh,210px)', borderRadius: 3, overflow: 'hidden', backgroundColor: '#0E4530', backgroundImage: 'repeating-linear-gradient(135deg,rgba(247,243,234,.08) 0 2px,transparent 2px 12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 22 }}>
+                  {hasImage(`region-${active.id}`) ? (
+                    <SlotImage slot={`region-${active.id}`} alt={active.en} />
+                  ) : (
+                    <span aria-hidden="true" style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.45)', border: '1px dashed rgba(247,243,234,.25)', padding: '7px 12px', direction: 'ltr' }}>{active.img}</span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
                   <h3 style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 'clamp(24px,2.8vw,38px)', lineHeight: 1.25, margin: 0 }}>{active.ar}</h3>
