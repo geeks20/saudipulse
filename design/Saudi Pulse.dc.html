@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@200;300;400;500;600;700&family=Manrope:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style>
+  html, body { margin:0; padding:0; background:#F7F3EA; }
+  * { box-sizing:border-box; }
+  a { color:#0E5A3C; text-decoration:none; }
+  a:hover { color:#C08A2E; }
+  ::selection { background:#C08A2E; color:#fff; }
+  @keyframes sp-rise { from { opacity:0; transform:translateY(22px);} to { opacity:1; transform:none;} }
+  @keyframes sp-fade { from { opacity:0;} to { opacity:1;} }
+  @keyframes sp-breathe { 0%,100% { opacity:.35; transform:scale(1);} 50% { opacity:.75; transform:scale(1.06);} }
+  @keyframes sp-ping { 0% { r:2; opacity:.9;} 100% { r:34; opacity:0;} }
+  @keyframes sp-sweep { 0% { transform:translateX(-40%);} 100% { transform:translateX(140%);} }
+  @keyframes sp-blink { 0%,100% { opacity:1;} 50% { opacity:.25;} }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
+</style>
+</helmet>
+<div dir="rtl" style="font-family:'Alexandria','Manrope',system-ui,sans-serif;background:#F7F3EA;color:#14120E;overflow-x:hidden">
+
+  <header style="position:fixed;top:0;left:0;right:0;z-index:60;backdrop-filter:blur(14px);background:{{ navBg }};border-bottom:1px solid {{ navBorder }};transition:background .45s ease,border-color .45s ease">
+    <nav style="max-width:1400px;margin:0 auto;padding:16px clamp(18px,4vw,44px);display:flex;align-items:center;gap:clamp(14px,3vw,40px)">
+      <a href="#top" style="display:flex;align-items:center;gap:10px;flex:none;color:inherit">
+        <span style="width:9px;height:9px;border-radius:50%;background:#C08A2E;box-shadow:0 0 0 4px rgba(192,138,46,.18);animation:sp-breathe 2.6s ease-in-out infinite"></span>
+        <span style="font-family:'Alexandria',sans-serif;font-weight:600;font-size:15px;letter-spacing:0;color:{{ navInk }};transition:color .45s ease">النبض السعودي</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:clamp(10px,2vw,26px);flex:1;flex-wrap:wrap">
+        <a href="#regions" style="font-size:14px;font-weight:400;color:{{ navInk }};opacity:.78">المناطق</a>
+        <a href="#traits" style="font-size:14px;font-weight:400;color:{{ navInk }};opacity:.78">طباعنا</a>
+        <a href="#moments" style="font-size:14px;font-weight:400;color:{{ navInk }};opacity:.78">٩٦ لحظة</a>
+        <a href="#now" style="font-size:14px;font-weight:400;color:{{ navInk }};opacity:.78">السعودية الآن</a>
+        <a href="#story" style="font-size:14px;font-weight:400;color:{{ navInk }};opacity:.78">قصتك</a>
+      </div>
+      <button type="button" onClick="{{ toggleLang }}" aria-label="Toggle body language" style="flex:none;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;padding:7px 12px;border-radius:999px;border:1px solid {{ navBorderStrong }};background:transparent;color:{{ navInk }};cursor:pointer">{{ langLabel }}</button>
+    </nav>
+  </header>
+
+  <section id="top" style="position:relative;min-height:100svh;background:#06281B;color:#F7F3EA;overflow:hidden;display:flex;align-items:center">
+    <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(120% 90% at 78% 8%, rgba(20,120,78,.55) 0%, rgba(6,40,27,0) 62%),radial-gradient(90% 70% at 10% 100%, rgba(192,138,46,.20) 0%, rgba(6,40,27,0) 60%)"></div>
+    <div aria-hidden="true" style="position:absolute;inset:0;opacity:.14;background-image:repeating-linear-gradient(45deg,rgba(247,243,234,.5) 0 1px,transparent 1px 34px),repeating-linear-gradient(-45deg,rgba(247,243,234,.5) 0 1px,transparent 1px 34px)"></div>
+    <div aria-hidden="true" style="position:absolute;inset:0;overflow:hidden"><div style="position:absolute;top:0;bottom:0;width:38%;background:linear-gradient(90deg,rgba(247,243,234,0) 0%,rgba(247,243,234,.055) 50%,rgba(247,243,234,0) 100%);animation:sp-sweep 11s linear infinite"></div></div>
+
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;padding-inline-start:2vw;pointer-events:none;opacity:.9">
+      <div style="width:min(62vw,880px);opacity:.55">{{ heroMap }}</div>
+    </div>
+
+    <div style="position:relative;z-index:2;max-width:1400px;margin:0 auto;padding:120px clamp(18px,4vw,44px) 90px;width:100%">
+      <div style="max-width:min(760px,92%);animation:sp-rise .9s cubic-bezier(.16,1,.3,1) both">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:clamp(22px,4vh,42px)">
+          <span style="height:1px;width:40px;background:rgba(192,138,46,.7)"></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#D9B778">٢٣ سبتمبر ٢٠٢٦ · 23.09.2026</span>
+        </div>
+        <h1 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(36px,6.2vw,88px);line-height:1.32;font-weight:600;letter-spacing:-.005em;margin:0 0 20px;text-wrap:balance">وش اللي يخلّي السعودية<br><span style="color:#D9B778">…سعودية؟</span></h1>
+        <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:clamp(14px,1.4vw,18px);font-weight:400;letter-spacing:.03em;color:rgba(247,243,234,.62);margin:0 0 clamp(34px,5vh,56px)">What makes Saudi, Saudi?</p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:clamp(20px,4vw,54px);margin-bottom:clamp(34px,5vh,54px)">
+          <div><div style="font-family:'Alexandria',sans-serif;font-size:clamp(23px,2.5vw,32px);font-weight:500;letter-spacing:0">٩٦ عاماً</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:rgba(247,243,234,.45);margin-top:6px">96 YEARS</div></div>
+          <div><div style="font-family:'Alexandria',sans-serif;font-size:clamp(23px,2.5vw,32px);font-weight:500;letter-spacing:0">١٣ منطقة</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:rgba(247,243,234,.45);margin-top:6px">13 REGIONS</div></div>
+          <div><div style="font-family:'Alexandria',sans-serif;font-size:clamp(23px,2.5vw,32px);font-weight:500;letter-spacing:0">٦ طباع</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:rgba(247,243,234,.45);margin-top:6px">6 TRAITS</div></div>
+          <div><div style="font-family:'Alexandria',sans-serif;font-size:clamp(23px,2.5vw,32px);font-weight:500;letter-spacing:0">ملايين القصص</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:rgba(247,243,234,.45);margin-top:6px">MILLIONS OF STORIES</div></div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:14px">
+          <a href="#regions" style="display:inline-flex;align-items:center;gap:10px;padding:16px 30px;border-radius:999px;background:#F7F3EA;color:#06281B;font-weight:600;font-size:15px" style-hover="background:#D9B778;color:#06281B">اكتشف السعودية <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;opacity:.55">EXPLORE</span></a>
+          <a href="#story" style="display:inline-flex;align-items:center;gap:10px;padding:16px 30px;border-radius:999px;border:1px solid rgba(247,243,234,.3);color:#F7F3EA;font-weight:500;font-size:15px" style-hover="border-color:#D9B778;color:#D9B778">اصنع قصتك <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;opacity:.5">CREATE</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div aria-hidden="true" style="position:absolute;bottom:26px;inset-inline-start:clamp(18px,4vw,44px);z-index:2;display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:rgba(247,243,234,.4)"><span style="width:1px;height:36px;background:linear-gradient(180deg,rgba(247,243,234,.5),transparent)"></span>SCROLL</div>
+  </section>
+
+  <section id="traits" style="background:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1400px;margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(38px,6vh,70px)">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:#9A8F79;margin-bottom:16px">٠١ — SIX TRAITS</div>
+          <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(32px,5vw,72px);line-height:1.22;letter-spacing:-.005em;margin:0;color:#0B3A28">عزّنا بطبعنا</h2>
+        </div>
+        <div style="max-width:320px">
+          <p style="font-family:'Alexandria',sans-serif;font-size:clamp(16px,1.6vw,20px);line-height:1.7;margin:0 0 8px;color:#14120E">ستة طباع.<br>هوية واحدة.</p>
+          <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:13.5px;font-weight:300;color:#7C7361;margin:0">Six traits. One identity.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(14px,1.6vw,22px)">
+        <sc-for list="{{ traits }}" as="t" hint-placeholder-count="6">
+          <article style="flex:{{ t.flex }};min-width:min(100%,320px);position:relative;border-radius:4px;overflow:hidden;background:#0B3A28;color:#F7F3EA;min-height:clamp(340px,44vh,520px);display:flex;flex-direction:column;justify-content:flex-end;cursor:default" style-hover="transform:translateY(-4px)">
+            <div aria-hidden="true" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(247,243,234,.09) 0 2px,transparent 2px 12px);background-color:#123F2C"></div>
+            <div aria-hidden="true" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(247,243,234,.42);border:1px dashed rgba(247,243,234,.25);padding:7px 12px;border-radius:2px;direction:ltr">{{ t.img }}</span></div>
+            <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,26,17,.94) 0%,rgba(4,26,17,.62) 38%,rgba(4,26,17,.08) 100%)"></div>
+            <div style="position:relative;padding:clamp(22px,2.4vw,34px)">
+              <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#D9B778">{{ t.num }}</span>
+                <h3 style="font-family:'Alexandria',sans-serif;font-weight:600;font-size:clamp(26px,3vw,42px);line-height:1.22;margin:0">{{ t.ar }}</h3>
+                <span style="font-family:'Manrope',sans-serif;direction:ltr;font-size:13px;font-weight:300;color:rgba(247,243,234,.55);letter-spacing:.04em">{{ t.en }}</span>
+              </div>
+              <p style="font-size:14.5px;line-height:1.75;color:rgba(247,243,234,.8);margin:0 0 16px;max-width:46ch">{{ t.desc }}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;padding:5px 10px;border-radius:999px;border:1px solid rgba(217,183,120,.4);color:#D9B778">{{ t.region }}</span>
+                <span style="font-size:12.5px;color:rgba(247,243,234,.55)">{{ t.fact }}</span>
+              </div>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="regions" style="background:#06281B;color:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1400px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:rgba(217,183,120,.8);margin-bottom:16px">٠٢ — THE MAP</div>
+      <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(28px,4.2vw,60px);line-height:1.24;letter-spacing:-.005em;margin:0 0 10px">١٣ منطقة… وآلاف الحكايات</h2>
+      <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:15px;font-weight:300;color:rgba(247,243,234,.5);margin:0 0 clamp(32px,5vh,58px)">13 Regions. Thousands of Stories.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(20px,3vw,48px);align-items:flex-start">
+        <div style="flex:1 1 min(100%,520px);position:relative">{{ bigMap }}</div>
+        <aside style="flex:1 1 min(100%,380px);min-width:min(100%,320px)">
+          <sc-if value="{{ activeRegion }}" hint-placeholder-val="{{ true }}">
+            <div style="animation:sp-fade .5s ease both">
+              <div aria-hidden="true" style="position:relative;height:clamp(150px,20vh,210px);border-radius:3px;overflow:hidden;background-color:#0E4530;background-image:repeating-linear-gradient(135deg,rgba(247,243,234,.08) 0 2px,transparent 2px 12px);display:flex;align-items:center;justify-content:center;margin-bottom:22px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(247,243,234,.45);border:1px dashed rgba(247,243,234,.25);padding:7px 12px;direction:ltr">{{ activeRegion.img }}</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px">
+                <h3 style="font-family:'Alexandria',sans-serif;font-weight:600;font-size:clamp(24px,2.8vw,38px);line-height:1.25;margin:0">{{ activeRegion.ar }}</h3>
+                <span style="font-family:'Manrope',sans-serif;direction:ltr;font-size:13px;font-weight:300;color:rgba(247,243,234,.5)">{{ activeRegion.en }}</span>
+              </div>
+              <p style="font-family:'Alexandria',sans-serif;font-size:17px;line-height:1.75;color:#D9B778;margin:0 0 20px">{{ activeRegion.quote }}</p>
+              <p style="font-size:14.5px;line-height:1.8;color:rgba(247,243,234,.75);margin:0 0 10px">{{ activeRegion.history }}</p>
+              <p style="font-size:14.5px;line-height:1.8;color:rgba(247,243,234,.75);margin:0 0 22px">{{ activeRegion.now }}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:26px;padding:18px 0;border-top:1px solid rgba(247,243,234,.12);border-bottom:1px solid rgba(247,243,234,.12);margin-bottom:20px">
+                <div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(247,243,234,.4);margin-bottom:6px">POPULATION</div><div style="font-size:20px;font-weight:500">{{ activeRegion.pop }}</div></div>
+                <div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(247,243,234,.4);margin-bottom:6px">TRAIT</div><div style="font-size:20px;font-weight:500;color:#D9B778">{{ activeRegion.traitAr }}</div></div>
+              </div>
+              <ul style="list-style:none;margin:0 0 24px;padding:0;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ activeRegion.facts }}" as="f" hint-placeholder-count="3">
+                  <li style="display:flex;gap:10px;font-size:13.5px;line-height:1.7;color:rgba(247,243,234,.66)"><span style="color:#C08A2E;flex:none">◆</span>{{ f }}</li>
+                </sc-for>
+              </ul>
+              <button type="button" style="padding:14px 26px;border-radius:999px;border:1px solid rgba(247,243,234,.3);background:transparent;color:#F7F3EA;font-family:inherit;font-size:14px;cursor:pointer" style-hover="border-color:#D9B778;color:#D9B778">تعرّف على المنطقة ←</button>
+            </div>
+          </sc-if>
+        </aside>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:clamp(28px,4vh,44px)">
+        <sc-for list="{{ regions }}" as="r" hint-placeholder-count="13">
+          <button type="button" onClick="{{ r.select }}" style="padding:9px 16px;border-radius:999px;border:1px solid {{ r.chipBorder }};background:{{ r.chipBg }};color:{{ r.chipInk }};font-family:inherit;font-size:13.5px;cursor:pointer;transition:all .3s ease">{{ r.ar }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="moments" style="background:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:#9A8F79;margin-bottom:16px">٠٣ — TIMELINE</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:22px;margin-bottom:30px">
+        <div>
+          <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(30px,4.6vw,64px);line-height:1.22;letter-spacing:-.005em;margin:0 0 8px;color:#0B3A28">٩٦ عاماً من الحكاية</h2>
+          <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:15px;font-weight:300;color:#7C7361;margin:0">96 Moments of Saudi</p>
+        </div>
+        <div style="text-align:left;direction:ltr">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#0B3A28">{{ momentProgress }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:#9A8F79">MOMENTS SEEDED</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:clamp(30px,5vh,52px);padding-bottom:26px;border-bottom:1px solid rgba(20,18,14,.1)">
+        <sc-for list="{{ categories }}" as="c" hint-placeholder-count="9">
+          <button type="button" onClick="{{ c.select }}" style="padding:8px 15px;border-radius:999px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.ink }};font-family:inherit;font-size:13px;cursor:pointer;transition:all .3s ease">{{ c.ar }}</button>
+        </sc-for>
+      </div>
+
+      <div style="position:relative;padding-inline-start:0">
+        <sc-for list="{{ moments }}" as="m" hint-placeholder-count="6">
+          <article style="display:flex;flex-wrap:wrap;gap:clamp(16px,3vw,40px);padding:clamp(22px,3vh,38px) 0;border-bottom:1px solid rgba(20,18,14,.08);animation:sp-rise .7s cubic-bezier(.16,1,.3,1) both">
+            <div style="flex:0 0 clamp(90px,10vw,150px)">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(22px,2.4vw,34px);color:#0B3A28;letter-spacing:-.005em">{{ m.year }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#B0A48C;margin-top:8px">{{ m.catEn }}</div>
+            </div>
+            <div style="flex:1 1 min(100%,320px);min-width:min(100%,260px)">
+              <h3 style="font-family:'Alexandria',sans-serif;font-weight:500;font-size:clamp(18px,1.9vw,25px);line-height:1.55;margin:0 0 4px;color:#14120E">{{ m.ar }}</h3>
+              <div style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:13px;font-weight:300;color:#8D836E;margin-bottom:12px">{{ m.en }}</div>
+              <p style="font-size:14.5px;line-height:1.8;color:#4A4437;margin:0 0 12px;max-width:62ch">{{ m.desc }}</p>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:#9A8F79;border:1px solid rgba(20,18,14,.14);padding:4px 9px;border-radius:2px;direction:ltr">SOURCE · {{ m.source }}</span>
+            </div>
+            <div aria-hidden="true" style="flex:0 0 clamp(110px,14vw,210px);min-height:110px;border-radius:2px;background-color:#E6DCC7;background-image:repeating-linear-gradient(135deg,rgba(11,58,40,.14) 0 2px,transparent 2px 11px);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#8D836E;direction:ltr">{{ m.img }}</span>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="now" style="background:#0B3A28;color:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1400px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:rgba(217,183,120,.8);margin-bottom:16px">٠٤ — RIGHT NOW</div>
+      <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(32px,5vw,72px);line-height:1.22;letter-spacing:-.005em;margin:0 0 12px">السعودية الآن</h2>
+      <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:15px;font-weight:300;color:rgba(247,243,234,.5);margin:0 0 clamp(36px,6vh,64px)">2026 — The Kingdom, right now.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:1px;background:rgba(247,243,234,.13);border:1px solid rgba(247,243,234,.13)">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+          <div style="flex:1 1 min(100%,240px);background:#0B3A28;padding:clamp(24px,3vw,42px)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(30px,3.6vw,52px);letter-spacing:-.03em;color:#F7F3EA;margin-bottom:12px">{{ s.display }}</div>
+            <div style="font-family:'Alexandria',sans-serif;font-size:15px;line-height:1.6;margin-bottom:4px">{{ s.ar }}</div>
+            <div style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:12.5px;font-weight:300;color:rgba(247,243,234,.45);margin-bottom:16px">{{ s.en }}</div>
+            <button type="button" onClick="{{ s.toggle }}" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;color:rgba(217,183,120,.85);background:transparent;border:0;padding:0;cursor:pointer;direction:ltr">{{ s.sourceLabel }}</button>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(14px,2vw,26px);margin-top:clamp(30px,5vh,56px)">
+        <sc-for list="{{ milestones }}" as="k" hint-placeholder-count="6">
+          <div style="flex:1 1 min(100%,280px);padding:22px 0;border-top:1px solid rgba(247,243,234,.16)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(217,183,120,.8);margin-bottom:12px">{{ k.tag }}</div>
+            <div style="font-family:'Alexandria',sans-serif;font-size:19px;line-height:1.5;margin-bottom:8px">{{ k.ar }}</div>
+            <div style="font-size:13.5px;line-height:1.7;color:rgba(247,243,234,.55);direction:ltr;text-align:right;font-family:'Manrope',sans-serif;font-weight:300">{{ k.en }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="pulse" style="background:#042015;color:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1400px;margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(24px,4vw,64px);align-items:center">
+        <div style="flex:1 1 min(100%,420px)">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px">
+            <span style="width:7px;height:7px;border-radius:50%;background:#7CD8A4;animation:sp-blink 1.6s ease-in-out infinite"></span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:#7CD8A4">LIVE</span>
+          </div>
+          <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(28px,4.2vw,58px);line-height:1.24;letter-spacing:-.005em;margin:0 0 10px">نبض السعودية اليوم</h2>
+          <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:15px;font-weight:300;color:rgba(247,243,234,.5);margin:0 0 clamp(30px,4vh,48px)">Saudi Pulse Today</p>
+
+          <div style="display:flex;flex-wrap:wrap;gap:clamp(20px,3vw,44px)">
+            <div><div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(34px,4vw,58px);letter-spacing:-.03em">{{ liveStories }}</div><div style="font-family:'Alexandria',sans-serif;font-size:14px;color:rgba(247,243,234,.6);margin-top:6px">قصة تُكتب الآن</div></div>
+            <div><div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(34px,4vw,58px);letter-spacing:-.03em">١٣</div><div style="font-family:'Alexandria',sans-serif;font-size:14px;color:rgba(247,243,234,.6);margin-top:6px">منطقة نابضة</div></div>
+            <div><div style="font-family:'Alexandria',sans-serif;font-size:clamp(28px,3.2vw,46px);color:#D9B778">الكرم</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(247,243,234,.45);margin-top:10px">MOST SELECTED TRAIT</div></div>
+          </div>
+
+          <div style="margin-top:clamp(30px,4vh,48px);display:flex;flex-direction:column;gap:12px;max-width:440px">
+            <sc-for list="{{ topRegions }}" as="tr" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:14px">
+                <span style="flex:0 0 76px;font-size:13.5px;color:rgba(247,243,234,.8)">{{ tr.ar }}</span>
+                <span style="flex:1;height:3px;background:rgba(247,243,234,.12);position:relative;overflow:hidden"><span style="position:absolute;inset-inline-start:0;top:0;bottom:0;width:{{ tr.pct }};background:linear-gradient(90deg,#1E7A52,#D9B778);transition:width 1.2s cubic-bezier(.16,1,.3,1)"></span></span>
+                <span style="flex:0 0 46px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(247,243,234,.45);direction:ltr;text-align:left">{{ tr.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex:1 1 min(100%,420px);position:relative">{{ pulseMap }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#F7F3EA;padding:0">
+    <sc-for list="{{ heritage }}" as="h" hint-placeholder-count="3">
+      <div data-count="{{ h.id }}" style="min-height:clamp(420px,86vh,900px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:clamp(50px,9vh,110px) clamp(18px,4vw,44px);border-bottom:1px solid rgba(20,18,14,.08);background:{{ h.bg }};color:{{ h.ink }}">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(46px,13vw,190px);line-height:.94;letter-spacing:-.045em;direction:ltr">{{ h.value }}</div>
+        <div style="font-family:'Alexandria',sans-serif;font-size:clamp(22px,3vw,44px);margin-top:clamp(14px,2vh,28px)">{{ h.ar }}</div>
+        <div style="font-family:'Manrope',sans-serif;direction:ltr;font-size:14px;font-weight:300;opacity:.55;margin-top:10px;max-width:40ch">{{ h.en }}</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:clamp(26px,4vh,46px);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;opacity:.45;direction:ltr">{{ h.place }}<span style="width:24px;height:1px;background:currentColor"></span>{{ h.source }}</div>
+      </div>
+    </sc-for>
+  </section>
+
+  <section id="story" style="background:#06281B;color:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:rgba(217,183,120,.8);margin-bottom:16px">٠٥ — YOUR STORY</div>
+      <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(32px,5vw,72px);line-height:1.22;letter-spacing:-.005em;margin:0 0 14px">اصنع قصتك</h2>
+      <p style="font-family:'Alexandria',sans-serif;font-size:clamp(15px,1.5vw,19px);color:rgba(247,243,234,.7);margin:0 0 6px">شاركنا وش اللي يخلّي السعودية غالية عليك.</p>
+      <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:14px;font-weight:300;color:rgba(247,243,234,.45);margin:0 0 clamp(36px,5vh,58px)">Tell us what makes Saudi special to you.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(24px,4vw,56px);align-items:flex-start">
+        <div style="flex:1 1 min(100%,420px)">
+          <div style="display:flex;gap:10px;margin-bottom:30px">
+            <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+              <div style="flex:1;height:2px;background:{{ st.bar }};transition:background .5s ease"></div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+            <div style="animation:sp-fade .45s ease both">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(217,183,120,.8);margin-bottom:14px">STEP 01</div>
+              <h3 style="font-family:'Alexandria',sans-serif;font-size:clamp(20px,2.2vw,30px);font-weight:600;margin:0 0 6px">أي منطقة أقرب لقلبك؟</h3>
+              <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:13px;font-weight:300;color:rgba(247,243,234,.45);margin:0 0 26px">Which region means the most to you?</p>
+              <div style="display:flex;flex-wrap:wrap;gap:9px">
+                <sc-for list="{{ cities }}" as="c" hint-placeholder-count="12">
+                  <button type="button" onClick="{{ c.select }}" style="padding:12px 18px;border-radius:3px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.ink }};font-family:inherit;font-size:14px;cursor:pointer;transition:all .28s ease;min-height:44px">{{ c.ar }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:sp-fade .45s ease both">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(217,183,120,.8);margin-bottom:14px">STEP 02</div>
+              <h3 style="font-family:'Alexandria',sans-serif;font-size:clamp(20px,2.2vw,30px);font-weight:600;margin:0 0 26px">أي طبع فيهم يمثّلك أكثر؟</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:9px">
+                <sc-for list="{{ traitChoices }}" as="tc" hint-placeholder-count="6">
+                  <button type="button" onClick="{{ tc.select }}" style="padding:14px 22px;border-radius:3px;border:1px solid {{ tc.border }};background:{{ tc.bg }};color:{{ tc.ink }};font-family:'Alexandria',sans-serif;font-size:17px;cursor:pointer;transition:all .28s ease;min-height:48px">{{ tc.ar }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:sp-fade .45s ease both">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(217,183,120,.8);margin-bottom:14px">STEP 03</div>
+              <h3 style="font-family:'Alexandria',sans-serif;font-size:clamp(20px,2.2vw,30px);font-weight:600;margin:0 0 26px">احكِ لنا بجملة عن تجربتك مع السعودية.</h3>
+              <textarea aria-label="قصتك" onInput="{{ setText }}" placeholder="جملة وحدة تكفي…" style="width:100%;min-height:130px;resize:vertical;padding:18px;border-radius:3px;border:1px solid rgba(247,243,234,.22);background:rgba(247,243,234,.04);color:#F7F3EA;font-family:inherit;font-size:16px;line-height:1.7"></textarea>
+              <input aria-label="الاسم الأول" onInput="{{ setName }}" placeholder="اسمك الأول (اختياري)" style="width:100%;margin-top:12px;padding:15px 18px;border-radius:3px;border:1px solid rgba(247,243,234,.22);background:rgba(247,243,234,.04);color:#F7F3EA;font-family:inherit;font-size:15px">
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:12px;margin-top:30px;flex-wrap:wrap">
+            <button type="button" onClick="{{ back }}" style="padding:14px 24px;border-radius:999px;border:1px solid rgba(247,243,234,.22);background:transparent;color:rgba(247,243,234,.7);font-family:inherit;font-size:14px;cursor:pointer;min-height:44px">رجوع</button>
+            <button type="button" onClick="{{ next }}" style="padding:14px 30px;border-radius:999px;border:0;background:{{ nextBg }};color:#06281B;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;min-height:44px">{{ nextLabel }}</button>
+          </div>
+        </div>
+
+        <div style="flex:1 1 min(100%,360px);display:flex;justify-content:center">
+          <div style="width:min(100%,400px);aspect-ratio:1080/1350;position:relative;border-radius:4px;overflow:hidden;background:#0B3A28;box-shadow:0 40px 80px -30px rgba(0,0,0,.6);animation:{{ cardAnim }}">
+            <div aria-hidden="true" style="position:absolute;inset:0;opacity:.16;background-image:repeating-linear-gradient(45deg,rgba(247,243,234,.6) 0 1px,transparent 1px 26px),repeating-linear-gradient(-45deg,rgba(247,243,234,.6) 0 1px,transparent 1px 26px)"></div>
+            <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(90% 70% at 20% 0%,rgba(30,122,82,.55),rgba(11,58,40,0) 70%)"></div>
+            <div style="position:relative;height:100%;padding:clamp(22px,4.5%,40px);display:flex;flex-direction:column;justify-content:space-between;color:#F7F3EA">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:rgba(247,243,234,.5)"><span>SAUDI PULSE</span><span>96</span></div>
+              <div>
+                <div style="font-family:'Alexandria',sans-serif;font-weight:600;font-size:clamp(24px,7%,40px);line-height:1.4;color:#D9B778;margin-bottom:22px">{{ cardHeadline }}</div>
+                <div style="font-family:'Alexandria',sans-serif;font-size:clamp(15px,4%,20px);line-height:1.8;color:#F7F3EA">{{ cardQuote }}</div>
+              </div>
+              <div>
+                <div style="height:1px;background:rgba(247,243,234,.2);margin-bottom:16px"></div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+                  <div>
+                    <div style="font-family:'Alexandria',sans-serif;font-size:16px">{{ cardCity }}</div>
+                    <div style="font-size:13px;color:rgba(247,243,234,.55);margin-top:4px">{{ cardName }}</div>
+                  </div>
+                  <div style="text-align:left;direction:ltr">
+                    <div style="font-family:'Alexandria',sans-serif;font-size:14px;color:#D9B778">عزّنا بطبعنا</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;color:rgba(247,243,234,.4);margin-top:5px">NATIONAL DAY 96 · 2026</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px;justify-content:flex-end">
+        <button type="button" onClick="{{ download }}" style="padding:12px 22px;border-radius:999px;border:1px solid rgba(247,243,234,.24);background:transparent;color:#F7F3EA;font-family:inherit;font-size:13.5px;cursor:pointer;min-height:44px">تحميل · Download</button>
+        <button type="button" onClick="{{ shareX }}" style="padding:12px 22px;border-radius:999px;border:1px solid rgba(247,243,234,.24);background:transparent;color:#F7F3EA;font-family:inherit;font-size:13.5px;cursor:pointer;min-height:44px">شارك على X</button>
+        <button type="button" onClick="{{ copyLink }}" style="padding:12px 22px;border-radius:999px;border:1px solid rgba(247,243,234,.24);background:transparent;color:#F7F3EA;font-family:inherit;font-size:13.5px;cursor:pointer;min-height:44px">{{ copyLabel }}</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="stories" style="background:#F7F3EA;padding:clamp(70px,11vh,140px) clamp(18px,4vw,44px)">
+    <div style="max-width:1400px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:#9A8F79;margin-bottom:16px">٠٦ — THE ARCHIVE</div>
+      <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(32px,5vw,72px);line-height:1.22;letter-spacing:-.005em;margin:0 0 10px;color:#0B3A28">قصصنا</h2>
+      <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:15px;font-weight:300;color:#7C7361;margin:0 0 clamp(36px,5vh,60px)">Our Stories</p>
+      <div style="columns:300px 3;column-gap:clamp(14px,1.6vw,22px)">
+        <sc-for list="{{ stories }}" as="s" hint-placeholder-count="9">
+          <article style="break-inside:avoid;margin-bottom:clamp(14px,1.6vw,22px);padding:clamp(20px,2.2vw,30px);background:{{ s.bg }};color:{{ s.ink }};border:1px solid rgba(20,18,14,.07);border-radius:3px;position:relative">
+            <div style="font-family:'Alexandria',sans-serif;font-size:{{ s.size }};line-height:1.7;margin-bottom:20px">{{ s.text }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;opacity:.55;direction:ltr">{{ s.meta }}</div>
+            <div style="margin-top:14px;font-size:13px;opacity:.75;font-family:'Alexandria',sans-serif">{{ s.name }} · {{ s.cityAr }} · <span style="color:#C08A2E">{{ s.traitAr }}</span></div>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="ask" style="background:#0B3A28;color:#F7F3EA;padding:clamp(60px,9vh,110px) clamp(18px,4vw,44px)">
+    <div style="max-width:820px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:rgba(217,183,120,.8);margin-bottom:16px">٠٧ — EXPERIMENTAL</div>
+      <h2 style="font-family:'Alexandria',sans-serif;font-weight:600;font-size:clamp(24px,3vw,40px);line-height:1.25;margin:0 0 10px">اسأل السعودية</h2>
+      <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:13.5px;font-weight:300;color:rgba(247,243,234,.45);margin:0 0 28px">Ask Saudi — about a city, place, moment, or story.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input aria-label="اسأل السعودية" onInput="{{ setAsk }}" onKeyDown="{{ askKey }}" placeholder="اسأل عن مدينة، مكان، لحظة، أو قصة." style="flex:1 1 260px;padding:16px 20px;border-radius:999px;border:1px solid rgba(247,243,234,.22);background:rgba(247,243,234,.05);color:#F7F3EA;font-family:inherit;font-size:15px">
+        <button type="button" onClick="{{ ask }}" style="padding:16px 28px;border-radius:999px;border:0;background:#D9B778;color:#06281B;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;min-height:44px">اسأل</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+        <sc-for list="{{ askSuggestions }}" as="q" hint-placeholder-count="4">
+          <button type="button" onClick="{{ q.select }}" style="padding:7px 14px;border-radius:999px;border:1px solid rgba(247,243,234,.16);background:transparent;color:rgba(247,243,234,.6);font-family:inherit;font-size:12.5px;cursor:pointer;direction:ltr">{{ q.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ askAnswer }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:26px;padding:26px;border:1px solid rgba(247,243,234,.14);border-radius:4px;background:rgba(247,243,234,.04);animation:sp-fade .5s ease both">
+          <p style="font-size:15px;line-height:1.9;margin:0 0 18px;color:rgba(247,243,234,.88)">{{ askAnswer.text }}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ askAnswer.chips }}" as="ch" hint-placeholder-count="2">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;padding:5px 10px;border-radius:2px;border:1px solid rgba(217,183,120,.35);color:#D9B778;direction:ltr">{{ ch }}</span>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <footer style="background:#042015;color:#F7F3EA;padding:clamp(80px,14vh,170px) clamp(18px,4vw,44px) clamp(40px,6vh,70px);position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;inset:0;opacity:.09;background-image:repeating-linear-gradient(45deg,rgba(247,243,234,.6) 0 1px,transparent 1px 30px),repeating-linear-gradient(-45deg,rgba(247,243,234,.6) 0 1px,transparent 1px 30px)"></div>
+    <div style="position:relative;max-width:1400px;margin:0 auto">
+      <h2 style="font-family:'Alexandria',sans-serif;font-weight:700;font-size:clamp(30px,5.8vw,96px);line-height:1.24;letter-spacing:-.005em;margin:0 0 20px">السعودية… نبض ما يوقف.</h2>
+      <p style="font-family:'Manrope',sans-serif;direction:ltr;text-align:right;font-size:clamp(14px,1.4vw,18px);font-weight:300;color:rgba(247,243,234,.45);margin:0 0 clamp(50px,8vh,100px)">Saudi Arabia. A pulse that keeps going.</p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;padding-top:26px;border-top:1px solid rgba(247,243,234,.14);font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:rgba(247,243,234,.4)">
+        <span>اليوم الوطني السعودي ٩٦ · ٢٣ سبتمبر ٢٠٢٦</span>
+        <span style="color:#D9B778;font-family:'Alexandria',sans-serif;letter-spacing:0;font-size:14px">عزّنا بطبعنا</span>
+        <a href="#top">رجوع للأعلى ↑</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#D9B778&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#D9B778&quot;,&quot;#C08A2E&quot;,&quot;#B9B09C&quot;,&quot;#E0C9A0&quot;],&quot;section&quot;:&quot;Identity&quot;},&quot;liveSimulation&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behaviour&quot;}}">
+class Component extends DCLogic {
+  /* ───────── DATA LAYER — replace these with Neon/API calls later.
+     getRegions() · getTraits() · getMoments() · getStats() · getStories() · submitStory()
+     Nothing below this block is referenced directly by the template. ───────── */
+  data = {
+    traits: [
+      { id:'courage', ar:'الشجاعة', en:'Courage', flex:'3 1 420px', img:'FALCON IN FLIGHT — LOW ANGLE',
+        descAr:'من رمال نجد إلى قمم السروات، الشجاعة هنا قرار يُتخذ قبل ما يصير حكاية.',
+        descEn:'From the sands of Najd to the peaks of Sarawat, courage here is a decision made long before it becomes a story.',
+        factAr:'الصقر رمزٌ للفروسية منذ قرون', factEn:'The falcon: a symbol of chivalry for centuries', region:'NAJD · نجد' },
+      { id:'vision', ar:'الرؤية', en:'Vision', flex:'2 1 340px', img:'RIYADH SKYLINE AT BLUE HOUR',
+        descAr:'تشوف المدينة قبل ما تُبنى… وتبنيها مثل ما شفتها.',
+        descEn:'To see the city before it is built — then build it exactly as you saw it.',
+        factAr:'رؤية ٢٠٣٠ تدخل مرحلة التسليم', factEn:'Vision 2030 enters delivery phase', region:'RIYADH · الرياض' },
+      { id:'authenticity', ar:'الأصالة', en:'Authenticity', flex:'2 1 340px', img:'NAJDI MUD ARCHITECTURE — DETAIL',
+        descAr:'طين ونخل وظل: عمارة تعرف جوّها وتحترم أهلها.',
+        descEn:'Mud, palm and shade: an architecture that knows its climate and respects its people.',
+        factAr:'الدرعية · موقع تراث عالمي', factEn:'At-Turaif · UNESCO World Heritage', region:'DIRIYAH · الدرعية' },
+      { id:'determination', ar:'الهمة', en:'Determination', flex:'3 1 420px', img:'ASIR TERRACES & MOUNTAIN ROAD',
+        descAr:'همّة تشقّ الجبل طريق، وتزرع المدرّج مكان ما فيه تربة.',
+        descEn:'A determination that carves roads through mountains and terraces soil where there was none.',
+        factAr:'أكثر من ٣٠٠ قرية مدرّجة في عسير', factEn:'300+ terraced villages across Asir', region:'ASEER · عسير' },
+      { id:'generosity', ar:'الجود', en:'Generosity', flex:'2 1 340px', img:'COMMUNITY IFTAR — OVERHEAD',
+        descAr:'تعطي قبل ما يُطلب منك، وتنسى إنك عطيت.',
+        descEn:'To give before being asked — and to forget that you gave.',
+        factAr:'٢٫٥ مليون نخلة في الأحساء', factEn:'2.5M date palms in Al-Ahsa', region:'AL-AHSA · الأحساء' },
+      { id:'hospitality', ar:'الكرم', en:'Hospitality', flex:'3 1 420px', img:'ARABIC COFFEE POURED IN A MAJLIS',
+        descAr:'فنجان صغير يقول لك شيء كبير: أنت هنا في بيتك.',
+        descEn:'A small cup carrying a large message: you are home here.',
+        factAr:'القهوة السعودية على قائمة اليونسكو', factEn:'Saudi coffee on the UNESCO list', region:'HAIL · حائل' }
+    ],
+    regions: [
+      { id:'riyadh', ar:'الرياض', en:'Riyadh', lat:24.71, lng:46.68, pop:'8.59M', traitAr:'الرؤية', traitEn:'Vision', img:'KING ABDULLAH FINANCIAL DISTRICT',
+        quote:'حيث تلتقي الطموحات وتُصنع الفرص.',
+        historyAr:'من بلدة طينية محاطة بسورٍ إلى عاصمةٍ تضم أكثر من ثُمن سكان المملكة.',
+        historyEn:'From a walled mud-brick town to a capital holding more than an eighth of the Kingdom\u2019s people.',
+        nowAr:'مترو الرياض يعيد تعريف حركة المدينة، والدرعية تستعيد حكاية التأسيس.',
+        nowEn:'Riyadh Metro is redefining how the city moves, while Diriyah restores the founding story.',
+        facts:['الدرعية: أول عاصمة للدولة السعودية الأولى','مترو الرياض: ٦ مسارات و٨٥ محطة','مقر أكثر من ثلث الشركات الكبرى في المملكة'] },
+      { id:'makkah', ar:'مكة المكرمة', en:'Makkah', lat:21.42, lng:40.5, pop:'8.55M', traitAr:'الجود', traitEn:'Generosity', img:'PILGRIMS AT DAWN — WIDE',
+        quote:'قِبلةُ قلبٍ لا تعرف الجغرافيا.',
+        historyAr:'مدينةٌ استقبلت الحجيج قبل أن تُرسم الطرق التي توصل إليها.',
+        historyEn:'A city that received pilgrims long before the roads leading to it were drawn.',
+        nowAr:'موسم حج ١٤٤٧ استقبل أكثر من ١٫٧ مليون حاج بمنظومة رقمية متكاملة.',
+        nowEn:'The 2026 Hajj season welcomed over 1.7 million pilgrims through a fully digital system.',
+        facts:['جدة التاريخية على قائمة اليونسكو منذ ٢٠١٤','ميناء جدة الإسلامي: بوابة البحر الأحمر','١٫٧ مليون حاج في ٢٠٢٦'] },
+      { id:'madinah', ar:'المدينة المنورة', en:'Madinah', lat:24.8, lng:39.6, pop:'2.39M', traitAr:'الأصالة', traitEn:'Authenticity', img:'ALULA — HEGRA TOMBS AT GOLDEN HOUR',
+        quote:'حيث تهدأ الخطى وتصفو الحكاية.',
+        historyAr:'مدينةٌ من نخيلٍ وبازلت، ومن حولها حِجْر ثمود التي نحتت الصخر بيوتاً.',
+        historyEn:'A city of palms and basalt, ringed by Hegra — where stone was carved into houses.',
+        nowAr:'العلا تتحول إلى وجهة ثقافية عالمية دون أن تفقد صمتها.',
+        nowEn:'AlUla is becoming a global cultural destination without losing its silence.',
+        facts:['الحِجر: أول موقع سعودي في اليونسكو ٢٠٠٨','١١١ مقبرة منحوتة في الصخر','واحة العلا: أكثر من ٢ مليون نخلة'] },
+      { id:'eastern', ar:'المنطقة الشرقية', en:'Eastern Province', lat:24.5, lng:49.2, pop:'5.29M', traitAr:'الهمة', traitEn:'Determination', img:'AL-AHSA OASIS FROM ABOVE',
+        quote:'حيث بدأت الحكاية الصناعية.',
+        historyAr:'من بئر الدمام رقم ٧ عام ١٩٣٨ تغيّر مسار المنطقة والعالم.',
+        historyEn:'Dammam Well No. 7, 1938 — the moment that changed the region and the world.',
+        nowAr:'الأحساء أكبر واحة نخيل في العالم وموقع تراث عالمي منذ ٢٠١٨.',
+        nowEn:'Al-Ahsa is the world\u2019s largest palm oasis and a World Heritage Site since 2018.',
+        facts:['٢٫٥ مليون نخلة في الأحساء','الظهران: مركز الطاقة في المملكة','جزيرة تاروت: آثار تعود لخمسة آلاف عام'] },
+      { id:'aseer', ar:'عسير', en:'Aseer', lat:18.7, lng:42.6, pop:'2.28M', traitAr:'الهمة', traitEn:'Determination', img:'RIJAL ALMAA STONE VILLAGE IN MIST',
+        quote:'ضبابٌ يصنع لوناً، وجبلٌ يصنع صبراً.',
+        historyAr:'بيوتٌ حجرية بارتفاع خمسة طوابق، وفنّ القطّ العسيري تنقشه النساء على الجدران.',
+        historyEn:'Five-storey stone houses, and Al-Qatt Al-Asiri painted on walls by the women of the region.',
+        nowAr:'قمة السودة تتحول إلى وجهة جبلية على ارتفاع ٣٬٠٠٠ متر.',
+        nowEn:'Soudah Peaks is becoming a mountain destination at 3,000 metres.',
+        facts:['القطّ العسيري في قائمة اليونسكو ٢٠١٧','أعلى قمة في المملكة: ٣٬٠١٥ م','رجال ألمع: قرية من ٦٠ قصراً حجرياً'] },
+      { id:'jazan', ar:'جازان', en:'Jazan', lat:17.3, lng:42.7, pop:'1.57M', traitAr:'الجود', traitEn:'Generosity', img:'FARASAN ISLANDS — SHALLOW REEF',
+        quote:'بحرٌ وجبلٌ في مشهدٍ واحد.',
+        historyAr:'موانئ قديمة على البحر الأحمر، ومصائد لؤلؤٍ كانت تُقصد من بعيد.',
+        historyEn:'Ancient Red Sea ports and pearl banks that drew travellers from far away.',
+        nowAr:'محمية جزر فرسان وجهة بيئية للغوص ورصد الطيور المهاجرة.',
+        nowEn:'The Farasan Islands reserve is now a destination for diving and migratory birds.',
+        facts:['أكثر من ٨٠ جزيرة في أرخبيل فرسان','زراعة البن الخولاني منذ قرون','جبل فيفا: مدرجات زراعية حلزونية'] },
+      { id:'qassim', ar:'القصيم', en:'Qassim', lat:26.2, lng:43.6, pop:'1.42M', traitAr:'الكرم', traitEn:'Hospitality', img:'BURAIDAH DATE MARKET AT SUNRISE',
+        quote:'سلّةُ التمر وميزانُ الكرم.',
+        historyAr:'سوق التمور في بريدة من أقدم الأسواق الموسمية وأكبرها في العالم.',
+        historyEn:'Buraidah\u2019s date market is among the oldest and largest seasonal markets on earth.',
+        nowAr:'القصيم تصدّر التمور لأكثر من ١٠٠ دولة.',
+        nowEn:'Qassim exports dates to more than 100 countries.',
+        facts:['أكثر من ٨ ملايين نخلة','مهرجان الكليجا في عنيزة','عنيزة من أقدم مدن نجد'] },
+      { id:'tabuk', ar:'تبوك', en:'Tabuk', lat:28.4, lng:36.8, pop:'0.91M', traitAr:'الرؤية', traitEn:'Vision', img:'NEOM COASTLINE — RED SEA CLIFFS',
+        quote:'حيث تبدأ الخرائط الجديدة.',
+        historyAr:'محطة على طريق الحج الشامي، ومسار سكة حديد الحجاز.',
+        historyEn:'A station on the Levantine pilgrimage route and the Hejaz Railway line.',
+        nowAr:'مشاريع البحر الأحمر ونيوم تعيد رسم شمال غرب المملكة.',
+        nowEn:'The Red Sea and NEOM projects are redrawing the Kingdom\u2019s north-west.',
+        facts:['جبال حسمى ذات التكوينات الرملية','محمية شرعان الطبيعية','ميناء ضباء على البحر الأحمر'] },
+      { id:'hail', ar:'حائل', en:'Hail', lat:27.3, lng:41.6, pop:'0.73M', traitAr:'الكرم', traitEn:'Hospitality', img:'JUBBAH ROCK ART PANEL',
+        quote:'أرضُ حاتم، حيث الكرم اسمٌ لا صفة.',
+        historyAr:'نقوش جُبّة وأم سنمان تحمل رسائل عمرها عشرة آلاف عام.',
+        historyEn:'The rock art of Jubbah carries messages ten thousand years old.',
+        nowAr:'حائل محطة رئيسية في رالي داكار السعودية.',
+        nowEn:'Hail is a principal stage of the Dakar Rally in Saudi Arabia.',
+        facts:['فن الصخور في حائل: يونسكو ٢٠١٥','جبل أجا وسلمى','مضيف حاتم الطائي في الأدب العربي'] },
+      { id:'jawf', ar:'الجوف', en:'Al Jawf', lat:29.9, lng:39.3, pop:'0.52M', traitAr:'الأصالة', traitEn:'Authenticity', img:'DUMAT AL-JANDAL — MARID CASTLE',
+        quote:'زيتونٌ وحجرٌ وذاكرة.',
+        historyAr:'دومة الجندل: مدينةٌ ذُكرت في النقوش الآشورية قبل الميلاد.',
+        historyEn:'Dumat Al-Jandal appears in Assyrian inscriptions from before the common era.',
+        nowAr:'الجوف من أكبر مناطق إنتاج الزيتون في الشرق الأوسط.',
+        nowEn:'Al Jawf is among the Middle East\u2019s largest olive-producing regions.',
+        facts:['أكثر من ٢٠ مليون شجرة زيتون','أعمدة الرجاجيل: ستونهنج العرب','قلعة مارد الأثرية'] },
+      { id:'najran', ar:'نجران', en:'Najran', lat:17.6, lng:44.5, pop:'0.62M', traitAr:'الأصالة', traitEn:'Authenticity', img:'AL-UKHDUD ARCHAEOLOGICAL SITE',
+        quote:'طينٌ مزخرفٌ وحكايةٌ أقدم من التاريخ.',
+        historyAr:'الأخدود: مدينةٌ من مدن طريق البخور القديم.',
+        historyEn:'Al-Ukhdud was a city on the ancient incense route.',
+        nowAr:'العمارة النجرانية الطينية تُرمَّم وتُعاد إلى الحياة.',
+        nowEn:'Najran\u2019s mud architecture is being restored and brought back to life.',
+        facts:['قصر الإمارة التاريخي','طريق البخور القديم','النقوش المسندية في الأخدود'] },
+      { id:'northern', ar:'الحدود الشمالية', en:'Northern Borders', lat:30.4, lng:41.6, pop:'0.39M', traitAr:'الشجاعة', traitEn:'Courage', img:'DESERT STEPPE AFTER RAIN',
+        quote:'سهوبٌ تتفتح بعد المطر.',
+        historyAr:'مسارات قوافل قديمة بين الجزيرة وبلاد الشام.',
+        historyEn:'Ancient caravan routes between Arabia and the Levant.',
+        nowAr:'مشروع وعد الشمال: مدينة تعدينية متكاملة.',
+        nowEn:'Waad Al Shamal: an integrated mining city.',
+        facts:['أكبر احتياطي فوسفات في المنطقة','محمية الخنفة البرية','عرعر: بوابة الشمال'] },
+      { id:'bahah', ar:'الباحة', en:'Al Bahah', lat:20.0, lng:41.4, pop:'0.34M', traitAr:'الشجاعة', traitEn:'Courage', img:'RAGHADAN FOREST — JUNIPER CANOPY',
+        quote:'غاباتٌ لا يتوقعها أحد.',
+        historyAr:'قرى ذي عين الأثرية مبنيةٌ من الحجر على جبلٍ من المرمر.',
+        historyEn:'The stone village of Dhee Ayn stands on a hill of white marble.',
+        nowAr:'الباحة وجهة صيفية للغابات والعسل الجبلي.',
+        nowEn:'Al Bahah is a summer destination of forests and mountain honey.',
+        facts:['أكثر من ٤٠ غابة طبيعية','قرية ذي عين الرخامية','عسل السدر الجبلي'] }
+    ],
+    moments: [
+      { y:'1727', cat:'foundation', ar:'تأسيس الدولة السعودية الأولى', en:'The First Saudi State', dAr:'من الدرعية تبدأ الحكاية: دولةٌ تتشكل في قلب نجد.', dEn:'The story begins in Diriyah: a state taking shape in the heart of Najd.', src:'DARAH', img:'AT-TURAIF MUD WALLS' },
+      { y:'1824', cat:'foundation', ar:'الدولة السعودية الثانية', en:'The Second Saudi State', dAr:'الرياض عاصمةً جديدة بعد سنوات الانقطاع.', dEn:'Riyadh becomes the new capital after years of interruption.', src:'DARAH', img:'OLD RIYADH GATE' },
+      { y:'1902', cat:'foundation', ar:'استرداد الرياض', en:'The Recapture of Riyadh', dAr:'ليلةٌ واحدة أعادت رسم مسار الجزيرة العربية.', dEn:'A single night that redrew the course of the Arabian Peninsula.', src:'DARAH', img:'MASMAK FORTRESS' },
+      { y:'1932', cat:'foundation', ar:'توحيد المملكة العربية السعودية', en:'Unification of the Kingdom', dAr:'٢٣ سبتمبر: إعلان اسمٍ واحد لأرضٍ واحدة.', dEn:'23 September: one name declared for one land.', src:'DARAH', img:'UNIFICATION DECREE DOCUMENT' },
+      { y:'1938', cat:'economy', ar:'اكتشاف النفط في الدمام', en:'Oil Discovered at Dammam', dAr:'بئر رقم ٧ تتدفق، ويبدأ فصلٌ جديد في الاقتصاد.', dEn:'Well No. 7 flows, opening a new economic chapter.', src:'ARAMCO', img:'DAMMAM WELL NO. 7' },
+      { y:'1953', cat:'society', ar:'إنشاء مجلس الوزراء', en:'Council of Ministers Established', dAr:'أول هيكلٍ حكومي حديث للدولة.', dEn:'The first modern governmental structure of the state.', src:'SPA', img:'ARCHIVAL GOVERNMENT PORTRAIT' },
+      { y:'1957', cat:'society', ar:'تأسيس جامعة الملك سعود', en:'King Saud University Founded', dAr:'أول جامعة في المملكة تفتح أبوابها.', dEn:'The Kingdom\u2019s first university opens its doors.', src:'KSU', img:'CAMPUS ARCHIVE PHOTO' },
+      { y:'1975', cat:'economy', ar:'انطلاق الجبيل وينبع', en:'Jubail & Yanbu Launched', dAr:'مدينتان صناعيتان تُبنيان من الصفر على ساحلين.', dEn:'Two industrial cities built from nothing on two coasts.', src:'RCJY', img:'INDUSTRIAL COASTLINE' },
+      { y:'1985', cat:'technology', ar:'أول رائد فضاء عربي', en:'First Arab Astronaut', dAr:'سلطان بن سلمان على متن ديسكفري.', dEn:'Sultan bin Salman aboard Discovery.', src:'NASA', img:'SHUTTLE MISSION PATCH' },
+      { y:'1994', cat:'heritage', ar:'هيئة السياحة والتراث الوطني', en:'Heritage Authority Formed', dAr:'بداية العمل المؤسسي على حماية المواقع.', dEn:'The start of institutional work protecting heritage sites.', src:'MOC', img:'EXCAVATION SITE' },
+      { y:'2008', cat:'heritage', ar:'الحِجر أول موقع تراث عالمي', en:'Hegra — First UNESCO Site', dAr:'١١١ مقبرة منحوتة تدخل قائمة التراث العالمي.', dEn:'111 rock-cut tombs enter the World Heritage List.', src:'UNESCO', img:'HEGRA TOMB FACADE' },
+      { y:'2010', cat:'heritage', ar:'حي الطريف بالدرعية', en:'At-Turaif District', dAr:'مهد الدولة السعودية الأولى يُدرج عالمياً.', dEn:'The birthplace of the First Saudi State is inscribed.', src:'UNESCO', img:'AT-TURAIF AT NIGHT' },
+      { y:'2014', cat:'heritage', ar:'جدة التاريخية', en:'Historic Jeddah', dAr:'الروشان والمرجان: عمارة البحر الأحمر تُصان.', dEn:'Roshan and coral stone: Red Sea architecture preserved.', src:'UNESCO', img:'ROSHAN BALCONY DETAIL' },
+      { y:'2015', cat:'heritage', ar:'فن الصخور في حائل', en:'Rock Art of Hail', dAr:'نقوشٌ عمرها عشرة آلاف عام على جبل أم سنمان.', dEn:'Ten-thousand-year-old engravings at Jabal Umm Sinman.', src:'UNESCO', img:'PETROGLYPH PANEL' },
+      { y:'2016', cat:'foundation', ar:'إطلاق رؤية ٢٠٣٠', en:'Vision 2030 Launched', dAr:'خطةٌ وطنية تعيد تعريف الاقتصاد والمجتمع.', dEn:'A national plan redefining economy and society.', src:'VISION 2030', img:'VISION LAUNCH STAGE' },
+      { y:'2017', cat:'culture', ar:'القطّ العسيري', en:'Al-Qatt Al-Asiri', dAr:'فنّ نساء عسير يدخل التراث غير المادي.', dEn:'The wall art of Asir\u2019s women joins intangible heritage.', src:'UNESCO', img:'PAINTED INTERIOR WALL' },
+      { y:'2018', cat:'heritage', ar:'واحة الأحساء', en:'Al-Ahsa Oasis', dAr:'أكبر واحة نخيل في العالم على قائمة اليونسكو.', dEn:'The world\u2019s largest palm oasis joins the UNESCO list.', src:'UNESCO', img:'PALM CANOPY FROM ABOVE' },
+      { y:'2019', cat:'tourism', ar:'التأشيرة السياحية', en:'Tourist Visa Introduced', dAr:'المملكة تفتح أبوابها لزوار العالم لأول مرة.', dEn:'The Kingdom opens to leisure visitors for the first time.', src:'MT', img:'AIRPORT ARRIVALS HALL' },
+      { y:'2021', cat:'culture', ar:'موسم الرياض', en:'Riyadh Season', dAr:'أكبر موسم ترفيهي وثقافي في المنطقة.', dEn:'The region\u2019s largest cultural and entertainment season.', src:'GEA', img:'BOULEVARD AT NIGHT' },
+      { y:'2022', cat:'sport', ar:'فوز تاريخي في كأس العالم', en:'A Historic World Cup Win', dAr:'الأخضر يكتب ليلةً لا تُنسى.', dEn:'The Green Falcons write an unforgettable night.', src:'SAFF', img:'STADIUM CROWD CELEBRATION' },
+      { y:'2023', cat:'tourism', ar:'تجاوز ١٠٠ مليون زيارة', en:'100M+ Visits', dAr:'المملكة تحقق مستهدف الزيارات قبل موعده بسبع سنوات.', dEn:'The Kingdom hits its visitor target seven years early.', src:'MT', img:'TRAVELLERS AT ALULA' },
+      { y:'2024', cat:'heritage', ar:'مشهد الفاو الأثري', en:'Al-Faw Cultural Landscape', dAr:'الموقع السعودي الثامن على قائمة التراث العالمي.', dEn:'The Kingdom\u2019s eighth World Heritage property.', src:'UNESCO', img:'AL-FAW DESERT PLATEAU' },
+      { y:'2024', cat:'technology', ar:'انطلاق مترو الرياض', en:'Riyadh Metro Opens', dAr:'٦ مسارات و٨٥ محطة تغيّر إيقاع العاصمة.', dEn:'Six lines and 85 stations change the capital\u2019s rhythm.', src:'RCRC', img:'METRO STATION INTERIOR' },
+      { y:'2025', cat:'economy', ar:'الرياض إير تحلّق', en:'Riyadh Air Takes Off', dAr:'ناقل وطني جديد يربط المملكة بمئة وجهة.', dEn:'A new national carrier linking the Kingdom to 100 destinations.', src:'RIYADH AIR', img:'AIRCRAFT LIVERY DETAIL' },
+      { y:'2026', cat:'sport', ar:'التأهل إلى كأس العالم ٢٠٢٦', en:'Qualification for World Cup 2026', dAr:'الأخضر يواصل الحضور على أكبر مسرح رياضي.', dEn:'The Green Falcons return to the sport\u2019s biggest stage.', src:'SAFF', img:'TEAM LINE-UP' },
+      { y:'2026', cat:'society', ar:'اليوم الوطني السعودي ٩٦', en:'96th Saudi National Day', dAr:'ستة وتسعون عاماً، وحكايةٌ ما زالت تُروى.', dEn:'Ninety-six years, and a story still being told.', src:'SPA', img:'FLAG AGAINST EVENING SKY' }
+    ],
+    categories: [
+      { key:'all', ar:'الكل', en:'ALL' }, { key:'foundation', ar:'التأسيس', en:'FOUNDATION' },
+      { key:'culture', ar:'الثقافة', en:'CULTURE' }, { key:'heritage', ar:'التراث', en:'HERITAGE' },
+      { key:'society', ar:'المجتمع', en:'SOCIETY' }, { key:'economy', ar:'الاقتصاد', en:'ECONOMY' },
+      { key:'tourism', ar:'السياحة', en:'TOURISM' }, { key:'technology', ar:'التقنية', en:'TECHNOLOGY' },
+      { key:'sport', ar:'الرياضة', en:'SPORT' }
+    ],
+    stats: [
+      { id:'hajj', display:'1,707,301', ar:'حاج في موسم ١٤٤٧', en:'Hajj pilgrims in 2026', source:'GASTAT · 2026' },
+      { id:'pop', display:'35.3M', ar:'إجمالي السكان تقديراً', en:'Estimated population', source:'GASTAT · 2024' },
+      { id:'tourism', display:'115.9M', ar:'رحلة سياحية', en:'Tourist trips', source:'MINISTRY OF TOURISM · 2024' },
+      { id:'regions', display:'13', ar:'منطقة إدارية', en:'Administrative regions', source:'MOI · 2024' },
+      { id:'unesco', display:'8', ar:'مواقع تراث عالمي', en:'UNESCO World Heritage properties', source:'UNESCO · 2024' }
+    ],
+    milestones: [
+      { tag:'VISION 2030', ar:'الرؤية تدخل مرحلة التسليم النهائية', en:'Vision 2030 enters its final delivery phase' },
+      { tag:'AVIATION', ar:'الرياض إير توسّع شبكتها الدولية', en:'Riyadh Air expands its international network' },
+      { tag:'MOBILITY', ar:'مترو الرياض: ٨٥ محطة في الخدمة', en:'Riyadh Metro: 85 stations in service' },
+      { tag:'SPORT', ar:'التأهل إلى كأس العالم ٢٠٢٦', en:'Qualification for the FIFA World Cup 2026' },
+      { tag:'DIGITAL', ar:'أكثر من ٦٠٠٠ خدمة حكومية رقمية', en:'6,000+ digital government services' },
+      { tag:'CULTURE', ar:'ثمانية مواقع سعودية في قائمة اليونسكو', en:'Eight Saudi properties on the UNESCO list' }
+    ],
+    heritage: [
+      { id:'unesco', target:8, suffix:'', ar:'مواقع تراث عالمي', en:'UNESCO World Heritage properties', place:'KINGDOM-WIDE', source:'UNESCO 2024', bg:'#F7F3EA', ink:'#0B3A28' },
+      { id:'palms', target:2500000, suffix:'+', ar:'نخلة', en:'Date palms in the oasis of Al-Ahsa', place:'AL-AHSA · الأحساء', source:'UNESCO 2018', bg:'#0B3A28', ink:'#F7F3EA' },
+      { id:'faw', target:12000, suffix:'~', ar:'أثرٌ في الفاو', en:'Archaeological remains at Al-Faw', place:'AL-FAW · الفاو', source:'HERITAGE COMMISSION', bg:'#F7F3EA', ink:'#0B3A28' }
+    ],
+    stories: [
+      { name:'أحمد', cityAr:'الرياض', cityEn:'Riyadh', traitAr:'الكرم', text:'أصبحت الرياض وطناً أسرع مما توقعت.', time:'قبل ٤ دقائق' },
+      { name:'نورة', cityAr:'أبها', cityEn:'Abha', traitAr:'الهمة', text:'في عسير تعلمت أن الضباب ليس حجاباً، بل دعوة للصعود أعلى.', time:'قبل ١٢ دقيقة' },
+      { name:'Layla', cityAr:'العلا', cityEn:'AlUla', traitAr:'الأصالة', text:'وقفت أمام الحِجر ولم أقل شيئاً. الصخر قال كل شيء.', time:'قبل ٢٢ دقيقة' },
+      { name:'خالد', cityAr:'جدة', cityEn:'Jeddah', traitAr:'الجود', text:'جدة تعطيك البحر أولاً، ثم تعطيك الناس.', time:'قبل ٣١ دقيقة' },
+      { name:'سارة', cityAr:'المدينة', cityEn:'Madinah', traitAr:'الأصالة', text:'المدينة تمشي بك ببطء حتى تصفو.', time:'قبل ٤٠ دقيقة' },
+      { name:'Omar', cityAr:'الخبر', cityEn:'Khobar', traitAr:'الرؤية', text:'أبي عمل في الظهران، وأنا أعمل الآن على ما سيأتي بعدها.', time:'قبل ساعة' },
+      { name:'منيرة', cityAr:'بريدة', cityEn:'Buraidah', traitAr:'الكرم', text:'لا تخرج من بيتٍ في القصيم دون تمرٍ في يدك.', time:'قبل ساعتين' },
+      { name:'فيصل', cityAr:'تبوك', cityEn:'Tabuk', traitAr:'الشجاعة', text:'رأيت الثلج في تبوك، وصدّقت أن كل شيء ممكن هنا.', time:'قبل ٣ ساعات' },
+      { name:'Hessa', cityAr:'الأحساء', cityEn:'Al-Ahsa', traitAr:'الجود', text:'ظلّ النخلة في الأحساء يكفي عائلة كاملة.', time:'قبل ٤ ساعات' }
+    ],
+    cities: ['الرياض','جدة','مكة المكرمة','المدينة المنورة','العلا','أبها','الدمام','الخبر','تبوك','بريدة','حائل','جازان'],
+    traitNames: ['الشجاعة','الرؤية','الأصالة','الهمة','الجود','الكرم'],
+    pulseCities: [ {ar:'الرياض',lat:24.71,lng:46.68},{ar:'جدة',lat:21.49,lng:39.19},{ar:'أبها',lat:18.22,lng:42.5},{ar:'الخبر',lat:26.28,lng:50.21},{ar:'المدينة',lat:24.47,lng:39.61},{ar:'تبوك',lat:28.38,lng:36.57} ],
+    topRegions: [ {ar:'الرياض',count:812},{ar:'مكة',count:596},{ar:'الشرقية',count:441},{ar:'عسير',count:318},{ar:'المدينة',count:274} ],
+    askMock: {
+      alula:{ text:'العلا واحةٌ في شمال غرب المملكة تضم الحِجر، أول موقع سعودي يُدرج في قائمة التراث العالمي عام ٢٠٠٨، ويحتوي على ١١١ مقبرة منحوتة في الصخر الرملي، إضافةً إلى بلدة العلا القديمة وواحةٍ تضم ملايين النخيل.', chips:['UNESCO 2008','ROYAL COMMISSION FOR ALULA'] },
+      '1932':{ text:'في ٢٣ سبتمبر ١٩٣٢ صدر المرسوم بتوحيد أجزاء المملكة تحت اسم «المملكة العربية السعودية». هذا التاريخ هو اليوم الوطني السعودي، ويوافق عام ٢٠٢٦ العام السادس والتسعين.', chips:['DARAH','SPA'] },
+      unesco:{ text:'للمملكة ثمانية مواقع على قائمة التراث العالمي: الحِجر، حي الطريف بالدرعية، جدة التاريخية، فن الصخور في حائل، واحة الأحساء، محمية عروق بني معارض، ومشهد الفاو الأثري.', chips:['UNESCO 2024','HERITAGE COMMISSION'] },
+      riyadh:{ text:'الرياض عاصمة المملكة ويقطنها نحو ٨٫٥٩ مليون نسمة. تشهد المدينة اليوم افتتاح المترو بستة مسارات، ومشروع الدرعية الذي يعيد إحياء مهد الدولة السعودية الأولى.', chips:['GASTAT 2024','RCRC'] },
+      asir:{ text:'عسير منطقة جبلية جنوب غرب المملكة، تشتهر بفن القطّ العسيري المدرج في قائمة اليونسكو للتراث غير المادي عام ٢٠١٧، وبقرية رجال ألمع الحجرية وقمة السودة أعلى نقطة في المملكة.', chips:['UNESCO 2017','MOC'] }
+    }
+  };
+  getRegions(){ return this.data.regions; }
+  getTraits(){ return this.data.traits; }
+  getMoments(){ return this.data.moments; }
+  getStats(){ return this.data.stats; }
+  getStories(){ return this.data.stories; }
+  submitStory(payload){ /* TODO: POST /api/stories → Neon */ return Promise.resolve({ ok:true, id:'mock-' + Date.now(), ...payload }); }
+
+  state = {
+    lang:'ar', scrolled:false, activeRegionId:'riyadh', hoverRegionId:null, cat:'all',
+    openSource:null, step:1, city:null, trait:null, text:'', name:'', submitted:false,
+    copied:false, askQ:'', askAnswer:null, pulses:[], liveCount:2847, counts:{},
+    path:null, pts:null
+  };
+
+  componentDidMount(){
+    this._onScroll = () => {
+      const s = window.scrollY > 40;
+      if (s !== this.state.scrolled) this.setState({ scrolled:s });
+    };
+    window.addEventListener('scroll', this._onScroll, { passive:true });
+    this.loadGeo();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduce && this.props.liveSimulation !== false) {
+      this._pulse = setInterval(() => {
+        const c = this.data.pulseCities[Math.floor(Math.random()*this.data.pulseCities.length)];
+        const id = Math.random().toString(36).slice(2);
+        this.setState(s => ({ pulses:[...s.pulses.slice(-5), { id, city:c }], liveCount:s.liveCount + 1 }));
+        setTimeout(() => this.setState(s => ({ pulses:s.pulses.filter(p => p.id !== id) })), 3000);
+      }, 2200);
+    }
+    this._io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const id = e.target.getAttribute('data-count');
+        if (id && this.state.counts[id] === undefined) this.animateCount(id);
+      });
+    }, { threshold:.4 });
+    setTimeout(() => document.querySelectorAll('[data-count]').forEach(n => this._io.observe(n)), 400);
+  }
+  componentWillUnmount(){
+    window.removeEventListener('scroll', this._onScroll);
+    clearInterval(this._pulse); if (this._io) this._io.disconnect();
+  }
+  animateCount(id){
+    const h = this.data.heritage.find(x => x.id === id); if (!h) return;
+    const dur = 1600, t0 = performance.now();
+    const tick = now => {
+      const p = Math.min(1, (now - t0)/dur), e = 1 - Math.pow(1 - p, 3);
+      this.setState(s => ({ counts:{ ...s.counts, [id]:Math.round(h.target*e) } }));
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  async loadGeo(){
+    const ready = () => window.d3 && window.topojson;
+    for (let i = 0; i < 120 && !ready(); i++) await new Promise(r => setTimeout(r, 60));
+    if (!ready()) return;
+    try {
+      const topo = await window.d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json');
+      const fc = window.topojson.feature(topo, topo.objects.countries);
+      const sa = fc.features.find(f => f.properties && f.properties.name === 'Saudi Arabia');
+      if (!sa) return;
+      const W = 900, H = 760;
+      const proj = window.d3.geoMercator().fitExtent([[40,40],[W-40,H-40]], sa);
+      const path = window.d3.geoPath(proj);
+      const pts = {};
+      this.data.regions.forEach(r => { pts[r.id] = proj([r.lng, r.lat]); });
+      const cityPts = {};
+      this.data.pulseCities.forEach(c => { cityPts[c.ar] = proj([c.lng, c.lat]); });
+      this.setState({ path:path(sa), pts, cityPts, mapW:W, mapH:H });
+    } catch (e) { console.warn('geo load failed', e); }
+  }
+
+  mapSvg(mode){
+    const R = React.createElement;
+    const { path, pts, cityPts } = this.state;
+    const gold = this.props.accent || '#D9B778';
+    const W = 900, H = 760;
+    if (!path) return R('div', { style:{ width:'100%', aspectRatio:'900/760' } });
+    const active = this.state.activeRegionId, hover = this.state.hoverRegionId;
+    const kids = [];
+    const cid = 'sp-clip-' + mode;
+    kids.push(R('defs', { key:'d' }, [
+      R('clipPath', { key:'c', id:cid }, R('path', { d:path })),
+      R('radialGradient', { key:'g', id:'sp-glow-' + mode }, [
+        R('stop', { key:0, offset:'0%', stopColor:gold, stopOpacity:.85 }),
+        R('stop', { key:1, offset:'100%', stopColor:gold, stopOpacity:0 })
+      ])
+    ]));
+    kids.push(R('path', { key:'fill', d:path, fill:'#0E4530', stroke:'rgba(217,183,120,.55)', strokeWidth:1.2 }));
+    kids.push(R('g', { key:'tex', clipPath:'url(#' + cid + ')', opacity:.5 },
+      Array.from({ length:44 }, (_, i) => R('line', { key:i, x1:0, y1:i*18, x2:W, y2:i*18 - 220, stroke:'rgba(247,243,234,.10)', strokeWidth:1 }))));
+    if (mode === 'big' && pts) {
+      kids.push(R('g', { key:'glow', clipPath:'url(#' + cid + ')' }, this.data.regions.map(r => {
+        const p = pts[r.id]; if (!p) return null;
+        const on = r.id === active || r.id === hover;
+        return R('circle', { key:r.id, cx:p[0], cy:p[1], r:on ? 150 : 90, fill:'url(#sp-glow-' + mode + ')', opacity:on ? .55 : .1, style:{ transition:'opacity .5s ease, r .5s ease' } });
+      })));
+      kids.push(R('g', { key:'pins' }, this.data.regions.map(r => {
+        const p = pts[r.id]; if (!p) return null;
+        const on = r.id === active;
+        return R('g', {
+          key:r.id, style:{ cursor:'pointer' }, tabIndex:0, role:'button',
+          'aria-label':r.en + ' — ' + r.ar,
+          onClick:() => this.setState({ activeRegionId:r.id }),
+          onKeyDown:e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.setState({ activeRegionId:r.id }); } },
+          onMouseEnter:() => this.setState({ hoverRegionId:r.id }),
+          onMouseLeave:() => this.setState({ hoverRegionId:null })
+        }, [
+          R('circle', { key:'hit', cx:p[0], cy:p[1], r:26, fill:'transparent' }),
+          R('circle', { key:'dot', cx:p[0], cy:p[1], r:on ? 6.5 : 3.5, fill:on ? gold : 'rgba(247,243,234,.75)', style:{ transition:'r .35s ease, fill .35s ease' } }),
+          R('text', { key:'lbl', x:p[0], y:p[1] - 14, textAnchor:'middle', fill:on ? gold : 'rgba(247,243,234,.6)', fontSize:on ? 19 : 15, fontFamily:"'Alexandria', sans-serif", style:{ transition:'all .35s ease', pointerEvents:'none' } }, r.ar)
+        ]);
+      })));
+    }
+    if (mode === 'pulse' && cityPts) {
+      kids.push(R('g', { key:'cities' }, this.data.pulseCities.map(c => {
+        const p = cityPts[c.ar]; if (!p) return null;
+        return R('circle', { key:c.ar, cx:p[0], cy:p[1], r:2.5, fill:'rgba(247,243,234,.5)' });
+      })));
+      kids.push(R('g', { key:'pl' }, this.state.pulses.map(pu => {
+        const p = cityPts[pu.city.ar]; if (!p) return null;
+        return R('g', { key:pu.id }, [
+          R('circle', { key:'c', cx:p[0], cy:p[1], r:3, fill:gold }),
+          R('circle', { key:'r', cx:p[0], cy:p[1], r:3, fill:'none', stroke:gold, strokeWidth:1.4, style:{ animation:'sp-ping 3s cubic-bezier(.16,1,.3,1) forwards' } })
+        ]);
+      })));
+    }
+    if (mode === 'hero' && pts) {
+      kids.push(R('g', { key:'hp' }, ['riyadh','makkah','eastern','aseer','tabuk'].map((id, i) => {
+        const p = pts[id]; if (!p) return null;
+        return R('circle', { key:id, cx:p[0], cy:p[1], r:4, fill:gold, style:{ animation:'sp-breathe ' + (2.4 + i*.4) + 's ease-in-out infinite', transformOrigin:p[0] + 'px ' + p[1] + 'px' } });
+      })));
+    }
+    return R('svg', { viewBox:'0 0 ' + W + ' ' + H, style:{ width:'100%', height:'auto', display:'block', overflow:'visible' }, role:'img', 'aria-label':'خريطة المملكة العربية السعودية' }, kids);
+  }
+
+  fmt(n){ return n.toLocaleString('en-US'); }
+  arNum(n){ return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]); }
+
+  renderVals(){
+    const s = this.state, en = s.lang === 'en', gold = this.props.accent || '#D9B778';
+    const dark = !s.scrolled;
+    const activeRegion = this.data.regions.find(r => r.id === s.activeRegionId);
+    const catAll = s.cat === 'all';
+    const moments = this.data.moments.filter(m => catAll || m.cat === s.cat);
+    const traitMap = { 'الشجاعة':'عزّي بشجاعتها', 'الرؤية':'عزّي برؤيتها', 'الأصالة':'عزّي بأصالتها', 'الهمة':'عزّي بهمتها', 'الجود':'عزّي بجودها', 'الكرم':'عزّي بكرمها' };
+    const heritageVals = this.data.heritage.map(h => {
+      const c = s.counts[h.id];
+      const shown = c === undefined ? 0 : c;
+      return { ...h, value:(h.suffix === '~' ? '~' : '') + this.fmt(shown) + (h.suffix === '+' ? '+' : '') };
+    });
+    return {
+      navBg: dark ? 'rgba(6,40,27,0)' : 'rgba(247,243,234,.88)',
+      navBorder: dark ? 'rgba(247,243,234,0)' : 'rgba(20,18,14,.1)',
+      navBorderStrong: dark ? 'rgba(247,243,234,.3)' : 'rgba(20,18,14,.2)',
+      navInk: dark ? '#F7F3EA' : '#0B3A28',
+      langLabel: en ? 'AR' : 'EN',
+      toggleLang: () => this.setState({ lang: en ? 'ar' : 'en' }),
+
+      heroMap: this.mapSvg('hero'),
+      bigMap: this.mapSvg('big'),
+      pulseMap: this.mapSvg('pulse'),
+
+      traits: this.data.traits.map((t, i) => ({
+        ...t, num:'٠' + this.arNum(i + 1),
+        desc: en ? t.descEn : t.descAr, fact: en ? t.factEn : t.factAr
+      })),
+
+      regions: this.data.regions.map(r => ({
+        ar:r.ar,
+        chipBg: r.id === s.activeRegionId ? gold : 'transparent',
+        chipInk: r.id === s.activeRegionId ? '#06281B' : 'rgba(247,243,234,.7)',
+        chipBorder: r.id === s.activeRegionId ? gold : 'rgba(247,243,234,.18)',
+        select: () => this.setState({ activeRegionId:r.id })
+      })),
+      activeRegion: activeRegion ? {
+        ar:activeRegion.ar, en:activeRegion.en, quote:activeRegion.quote, img:activeRegion.img,
+        pop:activeRegion.pop, traitAr: en ? activeRegion.traitEn : activeRegion.traitAr,
+        history: en ? activeRegion.historyEn : activeRegion.historyAr,
+        now: en ? activeRegion.nowEn : activeRegion.nowAr,
+        facts:activeRegion.facts
+      } : null,
+
+      momentProgress: this.arNum(this.data.moments.length) + ' / ٩٦',
+      categories: this.data.categories.map(c => ({
+        ar:c.ar,
+        bg: c.key === s.cat ? '#0B3A28' : 'transparent',
+        ink: c.key === s.cat ? '#F7F3EA' : '#5E5747',
+        border: c.key === s.cat ? '#0B3A28' : 'rgba(20,18,14,.16)',
+        select: () => this.setState({ cat:c.key })
+      })),
+      moments: moments.map(m => ({
+        year:m.y, ar:m.ar, en:m.en, desc: en ? m.dEn : m.dAr, img:m.img, source:m.src,
+        catEn:(this.data.categories.find(c => c.key === m.cat) || {}).en
+      })),
+
+      stats: this.data.stats.map(st => ({
+        display:st.display, ar:st.ar, en:st.en,
+        sourceLabel: s.openSource === st.id ? 'SOURCE · ' + st.source : 'SHOW SOURCE +',
+        toggle: () => this.setState({ openSource: s.openSource === st.id ? null : st.id })
+      })),
+      milestones: this.data.milestones,
+      heritage: heritageVals,
+
+      liveStories: this.fmt(s.liveCount),
+      topRegions: this.data.topRegions.map(t => ({ ar:t.ar, count:t.count, pct: Math.round(t.count/812*100) + '%' })),
+
+      steps: [1,2,3].map(n => ({ bar: s.step >= n ? gold : 'rgba(247,243,234,.16)' })),
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3,
+      cities: this.data.cities.map(c => ({
+        ar:c,
+        bg: s.city === c ? gold : 'transparent',
+        ink: s.city === c ? '#06281B' : 'rgba(247,243,234,.8)',
+        border: s.city === c ? gold : 'rgba(247,243,234,.2)',
+        select: () => this.setState({ city:c })
+      })),
+      traitChoices: this.data.traitNames.map(t => ({
+        ar:t,
+        bg: s.trait === t ? gold : 'transparent',
+        ink: s.trait === t ? '#06281B' : 'rgba(247,243,234,.85)',
+        border: s.trait === t ? gold : 'rgba(247,243,234,.2)',
+        select: () => this.setState({ trait:t })
+      })),
+      setText: e => this.setState({ text:e.target.value }),
+      setName: e => this.setState({ name:e.target.value }),
+      back: () => this.setState({ step:Math.max(1, s.step - 1), submitted:false }),
+      next: () => {
+        if (s.step < 3) return this.setState({ step:s.step + 1 });
+        this.submitStory({ city:s.city, trait:s.trait, text:s.text, name:s.name })
+          .then(() => this.setState({ submitted:true }));
+      },
+      nextLabel: s.step < 3 ? 'التالي' : 'اصنع البطاقة',
+      nextBg: gold,
+      cardAnim: s.submitted ? 'sp-rise .8s cubic-bezier(.16,1,.3,1) both' : 'none',
+      cardHeadline: traitMap[s.trait] || 'عزّنا بطبعنا',
+      cardQuote: s.text ? '«' + s.text + '»' : '«اكتب جملتك وبتظهر هنا.»',
+      cardCity: s.city || 'اختر مدينتك',
+      cardName: s.name || '—',
+      download: () => alert('تصدير البطاقة ١٠٨٠×١٣٥٠ — سيُربط بخدمة التصدير.\nExport hook ready (1080×1350 / 1200×675).'),
+      shareX: () => window.open('https://x.com/intent/post?text=' + encodeURIComponent((s.text || 'عزّنا بطبعنا') + ' — #اليوم_الوطني_السعودي_96'), '_blank'),
+      copyLink: () => { navigator.clipboard && navigator.clipboard.writeText(location.href); this.setState({ copied:true }); setTimeout(() => this.setState({ copied:false }), 1800); },
+      copyLabel: s.copied ? 'تم النسخ ✓' : 'نسخ الرابط',
+
+      stories: this.data.stories.map((st, i) => ({
+        text:st.text, name:st.name, cityAr:st.cityAr, traitAr:st.traitAr,
+        meta:st.cityEn.toUpperCase() + ' · ' + st.time,
+        size: i % 4 === 0 ? '22px' : (i % 3 === 0 ? '19px' : '16px'),
+        bg: i % 5 === 0 ? '#0B3A28' : (i % 7 === 3 ? '#EFE7D6' : '#FFFFFF'),
+        ink: i % 5 === 0 ? '#F7F3EA' : '#14120E'
+      })),
+
+      askSuggestions: ['Tell me about AlUla','What happened in 1932?','Saudi UNESCO sites','Tell me about Riyadh','What makes Asir unique?'].map(q => ({
+        label:q, select: () => this.setState({ askQ:q, askAnswer:this.answerFor(q) })
+      })),
+      setAsk: e => this.setState({ askQ:e.target.value }),
+      askKey: e => { if (e.key === 'Enter') this.setState({ askAnswer:this.answerFor(this.state.askQ) }); },
+      ask: () => this.setState({ askAnswer:this.answerFor(s.askQ) }),
+      askAnswer: s.askAnswer
+    };
+  }
+
+  answerFor(q){
+    const k = (q || '').toLowerCase(); const m = this.data.askMock;
+    if (k.includes('alula') || k.includes('العلا')) return m.alula;
+    if (k.includes('1932') || k.includes('١٩٣٢')) return m['1932'];
+    if (k.includes('unesco') || k.includes('تراث')) return m.unesco;
+    if (k.includes('riyadh') || k.includes('الرياض')) return m.riyadh;
+    if (k.includes('asir') || k.includes('عسير')) return m.asir;
+    return { text:'ما لقيت إجابة في البيانات المحلية لحد الآن. الواجهة جاهزة للربط بمصدر حقيقي لاحقاً.', chips:['MOCK MODE','NO SOURCE'] };
+  }
+}
+</script>
+</body>
+</html>
