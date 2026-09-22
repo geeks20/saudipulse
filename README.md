@@ -15,8 +15,11 @@ Implemented from the Claude Design file in `design/Saudi Pulse.dc.html`.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run migrate  # apply schema + seed to Neon (reads .env.local)
+npm run server   # Express API on :8787 (stories, pulse, health)
+npm run dev      # http://localhost:5173 (proxies /api → :8787)
 npm run build    # production build in dist/
+npm start        # production: migrate + serve API and dist/ on one port
 ```
 
 ## Sections
@@ -35,14 +38,29 @@ npm run build    # production build in dist/
 The nav EN/AR toggle switches body copy language for traits, region details,
 and timeline descriptions.
 
-## Wiring up a backend later
+## Backend
 
-All content and mock behaviour live in `src/data.js`:
+Express server (`server/index.js`) on Neon Postgres:
 
-- `submitStory(payload)` — currently resolves a mock; point it at `POST /api/stories`
-- `answerFor(q)` — keyword-matched local answers; swap for a real retrieval/LLM endpoint
-- The exported arrays (`regions`, `moments`, `stats`, `stories`, …) map 1:1 to
-  future API resources
+- `POST /api/stories` — submit a story (validated, rate-limited 5/hour/IP;
+  `AUTO_APPROVE=false` holds submissions for manual review)
+- `GET /api/stories` — approved stories for the قصصنا archive
+- `GET /api/pulse` — totals + per-city counts for the live section
+- `GET /api/health` — healthcheck (used by Railway)
 
-The card "Download" button is a placeholder hook for a 1080×1350 / 1200×675
-export service.
+Schema lives in `db/schema.sql`; `npm run migrate` is idempotent and runs
+automatically on `npm start`. The card Download button renders a real
+1080×1350 PNG client-side (`src/cardExport.js`).
+
+Still mocked: `answerFor(q)` in `src/data.js` (اسأل السعودية) — swap for a
+real retrieval/LLM endpoint when ready.
+
+## Deploy (Railway)
+
+Single service: `railway.json` builds the frontend and starts `npm start`.
+
+```bash
+railway init --name saudipulse
+railway variables --set "DATABASE_URL=<pooled Neon URL>"
+railway up && railway domain
+```
