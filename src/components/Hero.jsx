@@ -1,11 +1,12 @@
 import MapSvg from '../MapSvg.jsx'
-import { mono, alexandria, manrope } from '../utils.js'
+import Cta from './Cta.jsx'
+import { mono, alexandria } from '../utils.js'
 
 const STATS = [
   { ar: '٩٦ عاماً', en: '96 YEARS' },
   { ar: '١٣ منطقة', en: '13 REGIONS' },
   { ar: '٦ طباع', en: '6 TRAITS' },
-  { ar: 'ملايين القصص', en: 'MILLIONS OF STORIES' },
+  { ar: 'ملايين الحكايات', en: 'MILLIONS OF STORIES' },
 ]
 
 export default function Hero({ geo }) {
@@ -23,23 +24,26 @@ export default function Hero({ geo }) {
         </div>
       </div>
 
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: 1400, margin: '0 auto', padding: '120px clamp(18px,4vw,44px) 90px', width: '100%' }}>
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: 1400, margin: '0 auto', padding: '110px clamp(18px,4vw,44px) 90px', width: '100%' }}>
         <div style={{ maxWidth: 'min(760px,92%)', animation: 'sp-rise .9s cubic-bezier(.16,1,.3,1) both' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(22px,4vh,42px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(20px,3.5vh,36px)' }}>
             <span style={{ height: 1, width: 40, background: 'rgba(192,138,46,.7)' }} />
             <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.18em', color: '#D9B778' }}>٢٣ سبتمبر ٢٠٢٦ · 23.09.2026</span>
           </div>
-          <h1 style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 'clamp(36px,6.2vw,88px)', lineHeight: 1.32, letterSpacing: '-.005em', margin: '0 0 20px', textWrap: 'balance' }}>
+
+          <div style={{ marginBottom: 'clamp(18px,3vh,30px)' }}>
+            <div style={{ fontFamily: alexandria, fontWeight: 700, fontSize: 'clamp(52px,8vw,104px)', lineHeight: 1.1, letterSpacing: '-.01em' }}>منّا</div>
+            <div style={{ fontFamily: mono, fontSize: 'clamp(11px,1.2vw,14px)', letterSpacing: '.34em', color: '#D9B778', marginTop: 8 }}>MINNA SAUDI</div>
+          </div>
+
+          <h1 style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 'clamp(27px,4.4vw,62px)', lineHeight: 1.35, letterSpacing: '-.005em', margin: '0 0 18px', textWrap: 'balance' }}>
             وش اللي يخلّي السعودية<br /><span style={{ color: '#D9B778' }}>…سعودية؟</span>
           </h1>
-          <p style={{ fontFamily: alexandria, fontSize: 'clamp(16px,1.7vw,22px)', fontWeight: 400, lineHeight: 1.7, color: 'rgba(247,243,234,.78)', margin: '0 0 10px' }}>
-            حكاياتها كثيرة، لكن طبعها واحد.
-          </p>
-          <p style={{ fontFamily: manrope, direction: 'ltr', textAlign: 'right', fontSize: 'clamp(14px,1.4vw,18px)', fontWeight: 400, letterSpacing: '.03em', color: 'rgba(247,243,234,.62)', margin: '0 0 clamp(34px,5vh,56px)' }}>
-            What makes Saudi, Saudi?
+          <p style={{ fontFamily: alexandria, fontSize: 'clamp(16px,1.7vw,22px)', fontWeight: 400, lineHeight: 1.9, color: 'rgba(247,243,234,.78)', margin: '0 0 clamp(30px,4.5vh,50px)' }}>
+            من أهلها. من أرضها. من حكاياتها. من طبعها. <span style={{ color: '#D9B778', fontWeight: 600 }}>منّا.</span>
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(20px,4vw,54px)', marginBottom: 'clamp(34px,5vh,54px)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(20px,4vw,54px)', marginBottom: 'clamp(30px,4.5vh,50px)' }}>
             {STATS.map((s) => (
               <div key={s.en}>
                 <div style={{ fontFamily: alexandria, fontSize: 'clamp(23px,2.5vw,32px)', fontWeight: 500 }}>{s.ar}</div>
@@ -49,12 +53,12 @@ export default function Hero({ geo }) {
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
-            <a href="#regions" className="sp-cta-solid" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 30px', borderRadius: 999, background: '#F7F3EA', color: '#06281B', fontWeight: 600, fontSize: 15, transition: 'background .3s ease, color .3s ease' }}>
+            <Cta variant="solid" href="#regions" style={{ padding: '16px 30px' }}>
               اكتشف السعودية <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', opacity: 0.55 }}>EXPLORE</span>
-            </a>
-            <a href="#story" className="sp-hover-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 30px', borderRadius: 999, border: '1px solid rgba(247,243,234,.3)', color: '#F7F3EA', fontWeight: 500, fontSize: 15, transition: 'border-color .3s ease, color .3s ease' }}>
-              اصنع قصتك <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', opacity: 0.5 }}>CREATE</span>
-            </a>
+            </Cta>
+            <Cta variant="ghost" href="#story" style={{ padding: '16px 30px', fontSize: 15 }}>
+              وش قصتك؟ <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', opacity: 0.5 }}>YOUR STORY</span>
+            </Cta>
           </div>
         </div>
       </div>

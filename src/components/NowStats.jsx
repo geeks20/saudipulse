@@ -21,9 +21,11 @@ export default function NowStats() {
               <button
                 type="button"
                 onClick={() => setOpenSource(openSource === s.id ? null : s.id)}
-                style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '.12em', color: 'rgba(217,183,120,.85)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer', direction: 'ltr' }}
+                style={openSource === s.id
+                  ? { fontFamily: mono, fontSize: 9.5, letterSpacing: '.12em', color: 'rgba(217,183,120,.9)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer', direction: 'ltr' }
+                  : { fontFamily: 'inherit', fontSize: 12.5, color: 'rgba(217,183,120,.9)', background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
               >
-                {openSource === s.id ? `SOURCE · ${s.source}` : 'SHOW SOURCE +'}
+                {openSource === s.id ? s.source : 'المصدر ↗'}
               </button>
             </div>
           ))}

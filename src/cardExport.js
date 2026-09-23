@@ -22,6 +22,7 @@ function wrapText(ctx, text, maxWidth) {
 
 export async function downloadCard({ headline, quote, city, name }) {
   await document.fonts.load("600 76px Alexandria")
+  await document.fonts.load("600 40px Alexandria")
   await document.fonts.load("400 43px Alexandria")
   await document.fonts.load("500 26px 'IBM Plex Mono'")
 
@@ -50,15 +51,18 @@ export async function downloadCard({ headline, quote, city, name }) {
   ctx.fillStyle = grad
   ctx.fillRect(0, 0, W, H)
 
-  // top row (mono)
+  // top row: منّا wordmark right, mono tag left
+  ctx.textBaseline = 'top'
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
+  ctx.fillStyle = 'rgba(247,243,234,.85)'
+  ctx.font = '600 40px Alexandria'
+  ctx.fillText('منّا', W - PAD, PAD)
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'left'
   ctx.fillStyle = 'rgba(247,243,234,.5)'
   ctx.font = "500 26px 'IBM Plex Mono'"
-  ctx.textBaseline = 'top'
-  ctx.direction = 'ltr'
-  ctx.textAlign = 'right'
-  ctx.fillText('SAUDI PULSE', W - PAD, PAD)
-  ctx.textAlign = 'left'
-  ctx.fillText('96', PAD, PAD)
+  ctx.fillText('MINNA · 96', PAD, PAD + 8)
 
   // headline (gold, RTL)
   ctx.direction = 'rtl'
@@ -111,7 +115,7 @@ export async function downloadCard({ headline, quote, city, name }) {
   ctx.fillText('NATIONAL DAY 96 · 2026', PAD, footY + 104)
 
   const a = document.createElement('a')
-  a.download = 'saudi-pulse-card.png'
+  a.download = 'minna-card.png'
   a.href = canvas.toDataURL('image/png')
   a.click()
 }

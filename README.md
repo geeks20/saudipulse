@@ -1,4 +1,6 @@
-# النبض السعودي — Saudi Pulse
+# منّا — MINNA Saudi
+
+(formerly “Saudi Pulse / النبض السعودي” — public identity is now MINNA at minnasaudi.app)
 
 Single-page RTL microsite for the 96th Saudi National Day (23.09.2026):
 "وش اللي يخلّي السعودية… سعودية؟"

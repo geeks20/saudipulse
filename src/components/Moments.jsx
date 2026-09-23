@@ -18,8 +18,8 @@ export default function Moments({ lang }) {
             <p style={{ fontFamily: manrope, direction: 'ltr', textAlign: 'right', fontSize: 15, fontWeight: 300, color: '#7C7361', margin: 0 }}>96 Moments of Saudi</p>
           </div>
           <div style={{ textAlign: 'left', direction: 'ltr' }}>
-            <div style={{ fontFamily: mono, fontSize: 28, color: '#0B3A28' }}>{arNum(moments.length)} / ٩٦</div>
-            <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.16em', color: '#9A8F79' }}>MOMENTS SEEDED</div>
+            <div style={{ fontFamily: mono, fontSize: 28, color: '#0B3A28' }}>{arNum(moments.length)}</div>
+            <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.16em', color: '#9A8F79' }}>VERIFIED MOMENTS</div>
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export default function Moments({ lang }) {
                 {hasImage(`m-${m.id}`) ? (
                   <SlotImage slot={`m-${m.id}`} alt={m.en} />
                 ) : (
-                  <span aria-hidden="true" style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '.1em', color: '#8D836E', direction: 'ltr' }}>{m.img}</span>
+                  <span aria-hidden="true" style={{ fontFamily: mono, fontSize: 30, letterSpacing: '-.02em', color: 'rgba(11,58,40,.3)', direction: 'ltr' }}>{m.y}</span>
                 )}
               </div>
             </article>

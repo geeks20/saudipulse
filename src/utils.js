@@ -1,5 +1,4 @@
 export const ACCENT = '#D9B778'
-export const LIVE_SIMULATION = true
 
 export const fmt = (n) => n.toLocaleString('en-US')
 export const arNum = (n) => String(n).replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d])

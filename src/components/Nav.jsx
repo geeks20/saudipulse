@@ -34,7 +34,8 @@ export default function Nav({ lang, onToggleLang }) {
       <nav style={{ maxWidth: 1400, margin: '0 auto', padding: '16px clamp(18px,4vw,44px)', display: 'flex', alignItems: 'center', gap: 'clamp(14px,3vw,40px)' }}>
         <a href="#top" style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 'none', color: 'inherit' }}>
           <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#C08A2E', boxShadow: '0 0 0 4px rgba(192,138,46,.18)', animation: 'sp-breathe 2.6s ease-in-out infinite' }} />
-          <span style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 15, color: ink, transition: 'color .45s ease' }}>النبض السعودي</span>
+          <span style={{ fontFamily: alexandria, fontWeight: 700, fontSize: 17, color: ink, transition: 'color .45s ease' }}>منّا</span>
+          <span style={{ fontFamily: mono, fontSize: 9, letterSpacing: '.26em', color: ink, opacity: 0.55, transition: 'color .45s ease' }}>MINNA</span>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,26px)', flex: 1, flexWrap: 'wrap' }}>
           {LINKS.map((l) => (

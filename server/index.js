@@ -2,18 +2,21 @@ import express from 'express'
 import pg from 'pg'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { hasBlockedWord, BLOCKED_MESSAGE } from '../src/moderation.js'
+import { aiCheck } from './aiModeration.js'
 
 const PORT = process.env.PORT || 8787
-// Set AUTO_APPROVE=false in production to hold submissions for review
-// (approve with: UPDATE stories SET approved = true WHERE id = ...)
-const AUTO_APPROVE = process.env.AUTO_APPROVE !== 'false'
+// Submissions are held for review by default; set AUTO_APPROVE=true to publish instantly.
+// Review pending cards at /admin (requires ADMIN_TOKEN).
+const AUTO_APPROVE = process.env.AUTO_APPROVE === 'true'
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || ''
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
   max: 10,
 })
 
-const CITIES = ['الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'العلا', 'أبها', 'الدمام', 'الخبر', 'تبوك', 'بريدة', 'حائل', 'جازان', 'الأحساء']
+const CITIES = ['الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'العلا', 'أبها', 'الدمام', 'الخبر', 'تبوك', 'بريدة', 'حائل', 'جازان', 'الأحساء', 'سكاكا', 'نجران', 'عرعر', 'الباحة']
 const TRAITS = ['الشجاعة', 'الرؤية', 'الأصالة', 'الهمة', 'الجود', 'الكرم']
 
 // naive per-IP rate limit: 5 submissions per hour
@@ -65,6 +68,8 @@ app.post('/api/stories', async (req, res) => {
   if (!TRAITS.includes(trait)) return res.status(400).json({ error: 'invalid trait' })
   if (!cleanText || cleanText.length > 280) return res.status(400).json({ error: 'invalid text' })
   const cleanName = typeof name === 'string' ? name.trim().slice(0, 60) : null
+  if (hasBlockedWord(cleanText, cleanName)) return res.status(400).json({ error: BLOCKED_MESSAGE })
+  if ((await aiCheck(cleanText, cleanName)) === 'blocked') return res.status(400).json({ error: BLOCKED_MESSAGE })
 
   try {
     const { rows: [row] } = await pool.query(
@@ -82,23 +87,78 @@ app.post('/api/stories', async (req, res) => {
 
 app.get('/api/pulse', async (_req, res) => {
   try {
-    const [{ rows: [{ total }] }, { rows: byCity }] = await Promise.all([
-      pool.query('SELECT count(*)::int AS total FROM stories'),
+    const [{ rows: [{ total }] }, { rows: byCity }, { rows: [top] }] = await Promise.all([
+      pool.query('SELECT count(*)::int AS total FROM stories WHERE approved = true'),
       pool.query(
-        `SELECT city, count(*)::int AS count FROM stories
+        `SELECT city, count(*)::int AS count FROM stories WHERE approved = true
          GROUP BY city ORDER BY count DESC LIMIT 5`,
       ),
+      pool.query(
+        `SELECT trait, count(*)::int AS count FROM stories WHERE approved = true
+         GROUP BY trait ORDER BY count DESC LIMIT 1`,
+      ),
     ])
-    res.json({ total, byCity })
+    res.json({ total, byCity, topTrait: top?.trait || null })
   } catch (e) {
     console.error('GET /api/pulse', e)
     res.status(500).json({ error: 'internal' })
   }
 })
 
+// --- admin: review pending stories (Bearer ADMIN_TOKEN) ---
+function requireAdmin(req, res, next) {
+  if (!ADMIN_TOKEN) return res.status(503).json({ error: 'ADMIN_TOKEN not configured' })
+  const auth = req.headers.authorization || ''
+  if (auth !== `Bearer ${ADMIN_TOKEN}`) return res.status(401).json({ error: 'unauthorized' })
+  next()
+}
+
+app.get('/api/admin/stories', requireAdmin, async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, city, trait, text, name, created_at
+       FROM stories WHERE approved = false
+       ORDER BY created_at ASC LIMIT 200`,
+    )
+    res.json({ stories: rows })
+  } catch (e) {
+    console.error('GET /api/admin/stories', e)
+    res.status(500).json({ error: 'internal' })
+  }
+})
+
+app.post('/api/admin/stories/:id/approve', requireAdmin, async (req, res) => {
+  const id = Number(req.params.id)
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' })
+  try {
+    const { rowCount } = await pool.query('UPDATE stories SET approved = true WHERE id = $1', [id])
+    if (!rowCount) return res.status(404).json({ error: 'not found' })
+    res.json({ ok: true })
+  } catch (e) {
+    console.error('POST /api/admin/stories/:id/approve', e)
+    res.status(500).json({ error: 'internal' })
+  }
+})
+
+app.delete('/api/admin/stories/:id', requireAdmin, async (req, res) => {
+  const id = Number(req.params.id)
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' })
+  try {
+    const { rowCount } = await pool.query('DELETE FROM stories WHERE id = $1 AND approved = false', [id])
+    if (!rowCount) return res.status(404).json({ error: 'not found' })
+    res.json({ ok: true })
+  } catch (e) {
+    console.error('DELETE /api/admin/stories/:id', e)
+    res.status(500).json({ error: 'internal' })
+  }
+})
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+app.get('/admin', (_req, res) => res.sendFile(path.join(here, 'admin.html')))
+
 // serve the built frontend (single-service deploy on Railway)
-const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist')
+const dist = path.join(here, '..', 'dist')
 app.use(express.static(dist))
 app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')))
 
-app.listen(PORT, () => console.log(`saudipulse server on :${PORT} (auto-approve: ${AUTO_APPROVE})`))
+app.listen(PORT, () => console.log(`minna server on :${PORT} (auto-approve: ${AUTO_APPROVE})`))

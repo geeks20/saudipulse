@@ -1,14 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MapSvg from '../MapSvg.jsx'
 import { regions } from '../data.js'
 import SlotImage, { hasImage } from './SlotImage.jsx'
-import { ACCENT, mono, alexandria, manrope } from '../utils.js'
+import Cta from './Cta.jsx'
+import RegionDetail from './RegionDetail.jsx'
+import { ACCENT, mono, alexandria, manrope, prefersReducedMotion } from '../utils.js'
 
 export default function Regions({ geo, lang }) {
   const en = lang === 'en'
   const [activeId, setActiveId] = useState('riyadh')
   const [hoverId, setHoverId] = useState(null)
+  const [exploring, setExploring] = useState(false)
+  const detailRef = useRef(null)
   const active = regions.find((r) => r.id === activeId)
+
+  const scrollToDetail = () => detailRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+
+  useEffect(() => {
+    if (exploring) scrollToDetail()
+  }, [exploring])
+
+  const explore = () => {
+    if (exploring) scrollToDetail()
+    else setExploring(true)
+  }
 
   return (
     <section id="regions" style={{ background: '#06281B', color: '#F7F3EA', padding: 'clamp(70px,11vh,140px) clamp(18px,4vw,44px)' }}>
@@ -28,7 +43,7 @@ export default function Regions({ geo, lang }) {
                   {hasImage(`region-${active.id}`) ? (
                     <SlotImage slot={`region-${active.id}`} alt={active.en} />
                   ) : (
-                    <span aria-hidden="true" style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.45)', border: '1px dashed rgba(247,243,234,.25)', padding: '7px 12px', direction: 'ltr' }}>{active.img}</span>
+                    <span aria-hidden="true" style={{ fontFamily: alexandria, fontSize: 24, fontWeight: 600, color: 'rgba(247,243,234,.5)' }}>{active.ar}</span>
                   )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
@@ -55,9 +70,9 @@ export default function Regions({ geo, lang }) {
                     </li>
                   ))}
                 </ul>
-                <button type="button" className="sp-hover-gold" style={{ padding: '14px 26px', borderRadius: 999, border: '1px solid rgba(247,243,234,.3)', background: 'transparent', color: '#F7F3EA', fontFamily: 'inherit', fontSize: 14, cursor: 'pointer', transition: 'border-color .3s ease, color .3s ease' }}>
-                  خذ لك لفة في المنطقة ←
-                </button>
+                <Cta variant="ghost" onClick={explore} aria-expanded={exploring} aria-controls="region-detail">
+                  خذ لك لفة في {active.shortAr} ←
+                </Cta>
               </div>
             )}
           </aside>
@@ -84,6 +99,12 @@ export default function Regions({ geo, lang }) {
             )
           })}
         </div>
+
+        {exploring && active && (
+          <div ref={detailRef} style={{ scrollMarginTop: 76 }}>
+            <RegionDetail region={active} lang={lang} />
+          </div>
+        )}
       </div>
     </section>
   )

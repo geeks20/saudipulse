@@ -30,7 +30,7 @@ export default function Traits({ lang }) {
                 <SlotImage slot={`trait-${t.id}`} alt={t.en} />
               ) : (
                 <div aria-hidden="true" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.42)', border: '1px dashed rgba(247,243,234,.25)', padding: '7px 12px', borderRadius: 2, direction: 'ltr' }}>{t.img}</span>
+                  <span style={{ fontFamily: alexandria, fontSize: 30, fontWeight: 600, color: 'rgba(247,243,234,.28)' }}>{t.ar}</span>
                 </div>
               )}
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg,rgba(4,26,17,.94) 0%,rgba(4,26,17,.62) 38%,rgba(4,26,17,.08) 100%)' }} />

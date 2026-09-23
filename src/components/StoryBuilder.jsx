@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { cities, traitNames, traitHeadlines, submitStory } from '../data.js'
+import { hasBlockedWord, BLOCKED_MESSAGE } from '../moderation.js'
 import { downloadCard } from '../cardExport.js'
+import Cta from './Cta.jsx'
 import { ACCENT, mono, alexandria, manrope } from '../utils.js'
 
 const choiceStyle = (on, fontFamily, pad, fontSize) => ({
@@ -18,8 +20,27 @@ export default function StoryBuilder() {
   const [text, setText] = useState('')
   const [name, setName] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [pending, setPending] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+
+  // Region CTAs («وش قصتك مع …؟») land here with their city preselected.
+  useEffect(() => {
+    const onPrefill = (e) => {
+      const c = e.detail?.city
+      if (!c || !cities.includes(c)) return
+      setCity(c)
+      setStep(2)
+      setSubmitted(false)
+      setSubmitError(null)
+    }
+    window.addEventListener('sp:prefill-story', onPrefill)
+    return () => window.removeEventListener('sp:prefill-story', onPrefill)
+  }, [])
+
+  // «التالي» stays inert-looking until the current step has a choice.
+  const nextDisabled = (step === 1 && !city) || (step === 2 && !trait) || submitting
 
   const next = () => {
     if (step < 3) return setStep(step + 1)
@@ -27,24 +48,51 @@ export default function StoryBuilder() {
       setSubmitError('كمّل الخطوات الثلاث أول — منطقة، طبع، وجملة.')
       return
     }
+    if (hasBlockedWord(text, name)) {
+      setSubmitError(BLOCKED_MESSAGE)
+      return
+    }
     setSubmitError(null)
+    setSubmitting(true)
     submitStory({ city, trait, text: text.trim(), name })
-      .then(() => {
+      .then(({ story }) => {
         setSubmitted(true)
+        setPending(story && story.approved === false)
         window.dispatchEvent(new Event('sp:story-submitted'))
       })
       .catch((e) => setSubmitError(e.message === 'invalid city' ? 'اختر منطقة من القائمة.' : e.message))
+      .finally(() => setSubmitting(false))
   }
   const back = () => { setStep(Math.max(1, step - 1)); setSubmitted(false) }
 
-  const shareX = () =>
-    window.open('https://x.com/intent/post?text=' + encodeURIComponent((text || 'عزّنا بطبعنا') + ' — #اليوم_الوطني_السعودي_96'), '_blank')
-  const copyLink = () => {
-    navigator.clipboard && navigator.clipboard.writeText(location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1800)
+  const cleanCheck = () => {
+    if (hasBlockedWord(text, name)) {
+      setSubmitError(BLOCKED_MESSAGE)
+      return false
+    }
+    setSubmitError(null)
+    return true
+  }
+
+  const shareX = () => {
+    if (!cleanCheck()) return
+    const line = text.trim() ? `«${text.trim()}»` : 'عزّنا بطبعنا'
+    window.open(
+      'https://x.com/intent/post?text=' + encodeURIComponent(`${line}\n#اليوم_الوطني_السعودي_96`) + '&url=' + encodeURIComponent('https://minnasaudi.app'),
+      '_blank',
+    )
+  }
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {
+      setSubmitError('ما قدرنا ننسخ الرابط تلقائياً — انسخه من شريط العنوان.')
+    }
   }
   const download = () =>
+    cleanCheck() &&
     downloadCard({
       headline: traitHeadlines[trait] || 'عزّنا بطبعنا',
       quote: text ? `«${text}»` : '«اكتب جملتك وبتظهر هنا.»',
@@ -52,15 +100,13 @@ export default function StoryBuilder() {
       name: name || '—',
     })
 
-  const ghostBtn = { padding: '12px 22px', borderRadius: 999, border: '1px solid rgba(247,243,234,.24)', background: 'transparent', color: '#F7F3EA', fontFamily: 'inherit', fontSize: 13.5, cursor: 'pointer', minHeight: 44 }
-
   return (
     <section id="story" style={{ background: '#06281B', color: '#F7F3EA', padding: 'clamp(70px,11vh,140px) clamp(18px,4vw,44px)' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.2em', color: 'rgba(217,183,120,.8)', marginBottom: 16 }}>٠٥ — YOUR STORY</div>
-        <h2 style={{ fontFamily: alexandria, fontWeight: 700, fontSize: 'clamp(32px,5vw,72px)', lineHeight: 1.22, letterSpacing: '-.005em', margin: '0 0 14px' }}>اصنع قصتك</h2>
-        <p style={{ fontFamily: alexandria, fontSize: 'clamp(15px,1.5vw,19px)', color: 'rgba(247,243,234,.7)', margin: '0 0 6px' }}>وش قصتك مع السعودية؟ شاركنا اللي يخلّيها غالية عليك.</p>
-        <p style={{ fontFamily: manrope, direction: 'ltr', textAlign: 'right', fontSize: 14, fontWeight: 300, color: 'rgba(247,243,234,.45)', margin: '0 0 clamp(36px,5vh,58px)' }}>Tell us what makes Saudi special to you.</p>
+        <h2 style={{ fontFamily: alexandria, fontWeight: 700, fontSize: 'clamp(32px,5vw,72px)', lineHeight: 1.22, letterSpacing: '-.005em', margin: '0 0 14px' }}>وش قصتك؟</h2>
+        <p style={{ fontFamily: alexandria, fontSize: 'clamp(15px,1.5vw,19px)', color: 'rgba(247,243,234,.7)', margin: '0 0 6px' }}>ثلاث خطوات، وتطلع لك بطاقة باسمك تستاهل المشاركة.</p>
+        <p style={{ fontFamily: manrope, direction: 'ltr', textAlign: 'right', fontSize: 14, fontWeight: 300, color: 'rgba(247,243,234,.45)', margin: '0 0 clamp(36px,5vh,58px)' }}>Three steps to a card worth sharing.</p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(24px,4vw,56px)', alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 min(100%,420px)' }}>
@@ -98,7 +144,7 @@ export default function StoryBuilder() {
             {step === 3 && (
               <div style={{ animation: 'sp-fade .45s ease both' }}>
                 <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.16em', color: 'rgba(217,183,120,.8)', marginBottom: 14 }}>STEP 03</div>
-                <h3 style={{ fontFamily: alexandria, fontSize: 'clamp(20px,2.2vw,30px)', fontWeight: 600, margin: '0 0 26px' }}>قلها بجملة وحدة… وش تعني لك السعودية؟</h3>
+                <h3 style={{ fontFamily: alexandria, fontSize: 'clamp(20px,2.2vw,30px)', fontWeight: 600, margin: '0 0 26px' }}>وش قصتك مع السعودية؟</h3>
                 <textarea
                   aria-label="قصتك"
                   value={text}
@@ -117,13 +163,19 @@ export default function StoryBuilder() {
             )}
 
             <div style={{ display: 'flex', gap: 12, marginTop: 30, flexWrap: 'wrap' }}>
-              <button type="button" onClick={back} style={{ padding: '14px 24px', borderRadius: 999, border: '1px solid rgba(247,243,234,.22)', background: 'transparent', color: 'rgba(247,243,234,.7)', fontFamily: 'inherit', fontSize: 14, cursor: 'pointer', minHeight: 44 }}>رجوع</button>
-              <button type="button" onClick={next} style={{ padding: '14px 30px', borderRadius: 999, border: 0, background: ACCENT, color: '#06281B', fontFamily: 'inherit', fontWeight: 600, fontSize: 15, cursor: 'pointer', minHeight: 44 }}>
-                {step < 3 ? 'التالي' : 'اصنع البطاقة'}
-              </button>
+              {step > 1 && (
+                <Cta variant="ghost" onClick={back} disabled={submitting} style={{ color: 'rgba(247,243,234,.7)', borderColor: 'rgba(247,243,234,.22)' }}>رجوع</Cta>
+              )}
+              <Cta variant="gold" onClick={next} disabled={nextDisabled} loading={submitting}>
+                {submitting ? 'جاري الإرسال…' : step < 3 ? 'التالي' : 'اصنع بطاقتي'}
+              </Cta>
             </div>
             {submitted && (
-              <p style={{ marginTop: 16, fontSize: 14, color: '#7CD8A4', animation: 'sp-fade .4s ease both' }}>وصلت قصتك — شكراً لك. حمّل بطاقتك وشاركها.</p>
+              <p style={{ marginTop: 16, fontSize: 14, color: '#7CD8A4', animation: 'sp-fade .4s ease both' }}>
+                {pending
+                  ? 'وصلت قصتك — بتظهر في الموقع بعد المراجعة. حمّل بطاقتك وشاركها.'
+                  : 'وصلت قصتك — شكراً لك. حمّل بطاقتك وشاركها.'}
+              </p>
             )}
             {submitError && (
               <p style={{ marginTop: 16, fontSize: 14, color: '#E8A48E' }}>{submitError}</p>
@@ -135,8 +187,9 @@ export default function StoryBuilder() {
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, opacity: 0.16, backgroundImage: 'repeating-linear-gradient(45deg,rgba(247,243,234,.6) 0 1px,transparent 1px 26px),repeating-linear-gradient(-45deg,rgba(247,243,234,.6) 0 1px,transparent 1px 26px)' }} />
               <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(90% 70% at 20% 0%,rgba(30,122,82,.55),rgba(11,58,40,0) 70%)' }} />
               <div style={{ position: 'relative', height: '100%', padding: 'clamp(22px,4.5%,40px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', color: '#F7F3EA' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: mono, fontSize: 9.5, letterSpacing: '.16em', color: 'rgba(247,243,234,.5)' }}>
-                  <span>SAUDI PULSE</span><span>96</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 15, color: 'rgba(247,243,234,.85)' }}>منّا</span>
+                  <span style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '.16em', color: 'rgba(247,243,234,.5)', direction: 'ltr' }}>MINNA · 96</span>
                 </div>
                 <div>
                   <div style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 'clamp(24px,7%,40px)', lineHeight: 1.4, color: '#D9B778', marginBottom: 22 }}>
@@ -165,9 +218,9 @@ export default function StoryBuilder() {
         </div>
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 28, justifyContent: 'flex-end' }}>
-          <button type="button" onClick={download} style={ghostBtn}>تحميل · Download</button>
-          <button type="button" onClick={shareX} style={ghostBtn}>شارك على X</button>
-          <button type="button" onClick={copyLink} style={ghostBtn}>{copied ? 'تم النسخ ✓' : 'نسخ الرابط'}</button>
+          <Cta variant="gold" onClick={shareX} style={{ padding: '12px 22px', fontSize: 13.5 }}>شاركها على X</Cta>
+          <Cta variant="ghost" onClick={download} style={{ padding: '12px 22px', fontSize: 13.5 }}>تحميل البطاقة</Cta>
+          <Cta variant="ghost" onClick={copyLink} style={{ padding: '12px 22px', fontSize: 13.5 }}>{copied ? 'تم النسخ ✓' : 'نسخ الرابط'}</Cta>
         </div>
       </div>
     </section>

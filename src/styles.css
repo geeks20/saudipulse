@@ -1,4 +1,7 @@
 html, body { margin: 0; padding: 0; background: #F7F3EA; }
+html { scroll-behavior: smooth; }
+/* anchored sections land below the fixed nav */
+[id] { scroll-margin-top: 76px; }
 * { box-sizing: border-box; }
 body {
   font-family: 'Alexandria', 'Manrope', system-ui, sans-serif;
@@ -7,6 +10,14 @@ body {
 }
 a { color: #0E5A3C; text-decoration: none; }
 a:hover { color: #C08A2E; }
+
+/* every interactive element gets a visible keyboard focus state */
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid #C08A2E;
+  outline-offset: 3px;
+}
+button:disabled { cursor: not-allowed; }
 ::selection { background: #C08A2E; color: #fff; }
 
 @keyframes sp-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
@@ -23,6 +34,7 @@ a:hover { color: #C08A2E; }
 .sp-trait-card:hover { transform: translateY(-4px); }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: .001ms !important;
     animation-iteration-count: 1 !important;
