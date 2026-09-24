@@ -57,6 +57,7 @@ export default function Regions({ geo, lang }) {
                   <div>
                     <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.4)', marginBottom: 6 }}>POPULATION</div>
                     <div style={{ fontSize: 20, fontWeight: 500 }}>{active.pop}</div>
+                    <div style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '.12em', color: 'rgba(217,183,120,.6)', marginTop: 5, direction: 'ltr' }}>GASTAT · CENSUS 2022</div>
                   </div>
                   <div>
                     <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.14em', color: 'rgba(247,243,234,.4)', marginBottom: 6 }}>TRAIT</div>

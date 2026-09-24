@@ -25,7 +25,7 @@ export default function Hero({ geo }) {
       </div>
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: 1400, margin: '0 auto', padding: '110px clamp(18px,4vw,44px) 90px', width: '100%' }}>
-        <div style={{ maxWidth: 'min(760px,92%)', animation: 'sp-rise .9s cubic-bezier(.16,1,.3,1) both' }}>
+        <div style={{ maxWidth: 'min(830px,92%)', animation: 'sp-rise .9s cubic-bezier(.16,1,.3,1) both' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(20px,3.5vh,36px)' }}>
             <span style={{ height: 1, width: 40, background: 'rgba(192,138,46,.7)' }} />
             <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.18em', color: '#D9B778' }}>٢٣ سبتمبر ٢٠٢٦ · 23.09.2026</span>
@@ -36,12 +36,12 @@ export default function Hero({ geo }) {
             <div style={{ fontFamily: mono, fontSize: 'clamp(11px,1.2vw,14px)', letterSpacing: '.34em', color: '#D9B778', marginTop: 8 }}>MINNA SAUDI</div>
           </div>
 
-          <h1 style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 'clamp(27px,4.4vw,62px)', lineHeight: 1.35, letterSpacing: '-.005em', margin: '0 0 18px', textWrap: 'balance' }}>
-            وش اللي يخلّي السعودية<br /><span style={{ color: '#D9B778' }}>…سعودية؟</span>
+          {/* line breaks are deliberate: each sentence owns a line, and the gold
+              phrase wraps as one unit so mobile never splits it mid-thought */}
+          <h1 style={{ fontFamily: alexandria, fontWeight: 600, fontSize: 'clamp(29px,4vw,58px)', lineHeight: 1.5, letterSpacing: '-.005em', margin: '0 0 clamp(30px,4.5vh,50px)' }}>
+            <span style={{ display: 'block', whiteSpace: 'nowrap' }}>من كل ديرة… حكاية.</span>
+            <span style={{ display: 'block' }}>ومن كل حكاية… <span style={{ color: '#D9B778', whiteSpace: 'nowrap' }}>شيء منّا.</span></span>
           </h1>
-          <p style={{ fontFamily: alexandria, fontSize: 'clamp(16px,1.7vw,22px)', fontWeight: 400, lineHeight: 1.9, color: 'rgba(247,243,234,.78)', margin: '0 0 clamp(30px,4.5vh,50px)' }}>
-            من أهلها. من أرضها. من حكاياتها. من طبعها. <span style={{ color: '#D9B778', fontWeight: 600 }}>منّا.</span>
-          </p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(20px,4vw,54px)', marginBottom: 'clamp(30px,4.5vh,50px)' }}>
             {STATS.map((s) => (
