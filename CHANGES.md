@@ -1,8 +1,11 @@
 # MINNA — Change Log (23–24 Sep 2026)
 
-All changes across the CTA audit, region deep-dives, hero update, and the
-sensitivity & tone audit. Committed work is marked; everything else is in the
-working tree awaiting commit.
+All changes across the CTA audit, region deep-dives, hero update, the
+sensitivity & tone audit, and the final factual-integrity pass.
+
+**Commits:** `88e712e` (CTA audit + rebrand + moderation) · `98d7b8d` (hero +
+tone & factual audits) — both pushed to `main` and deployed to
+[minnasaudi.app](https://minnasaudi.app) via Railway.
 
 ---
 
@@ -42,7 +45,7 @@ mobile touch (390px), and keyboard; zero console errors.
 
 ---
 
-## 2. Hero Copy & Hierarchy ⏳ uncommitted
+## 2. Hero Copy & Hierarchy ✅ committed (`98d7b8d`)
 
 Removed: «وش اللي يخلّي السعودية… سعودية؟» and «من أهلها. من أرضها. من
 حكاياتها. من طبعها. منّا.»
@@ -66,7 +69,7 @@ New hierarchy (nothing else in the hero touched):
 
 ---
 
-## 3. Sensitivity & Tone Audit ⏳ uncommitted
+## 3. Sensitivity & Tone Audit ✅ committed (`98d7b8d`)
 
 **Rule applied: جذور نفتخر فيها → حاضر نعيشه → حكاية مستمرة — not
 ماضٍ بسيط → حاضر متطور. Facts preserved; framing rewritten. No invented facts.**
@@ -106,7 +109,33 @@ New hierarchy (nothing else in the hero touched):
 | Northern — درب زبيدة | `1,400+` عام | `1,200+` عام من تاريخ درب زبيدة | Abbasid-era road (~8th century CE) |
 | Tabuk — Hejaz Railway | `1907` وصول السكة إلى تبوك | `1,300+` كيلومتراً امتداد السكة مروراً بتبوك | Arrival year couldn't be confidently verified; line length is safely cited |
 
-### 3.5 Reviewed and deliberately kept
+### 3.5 Final factual-integrity pass ✅ committed (`98d7b8d`)
+
+Every number, date, attribution, "first/largest" claim, UNESCO statement and
+2025–2026 claim re-checked against its attached source. Changed:
+
+| Claim | Action | Why |
+|---|---|---|
+| Riyadh prose «نحو رُبع سكان المملكة» | Removed from prose → «من جذورها النجدية وحكاية التأسيس، إلى حاضرٍ يتجدد كل يوم؛ تحمل الرياض حكاية تمتد عبر الأجيال» | Population share is derived arithmetic; absolute 8.59M already displayed as sourced stat |
+| Riyadh `~25%` numbers card | Removed | Derived, not published by GASTAT; duplicated the sourced population |
+| POPULATION block (all regions) | Now labeled **GASTAT · CENSUS 2022** | Regional figures are 2022 census values, not 2024 estimates |
+| «مقر أكثر من ثلث الشركات الكبرى» | → «مقر لكثير من كبرى الشركات» | "More than a third" share has no source |
+| Eastern «سبع محاولات خائبة… ثم بئر ٧» | → «ست محاولات لم تحقق المأمول…» | Well No. 7 *was* the seventh attempt — six preceded it |
+| Eastern «قبل النفط بخمسة آلاف عام كانت تاروت ميناءً» | → «بآلاف السنين» | The sourced 5,000-yr figure covers settlement, not that specific trade claim |
+| Tabuk fact «محمية شرعان» | → «محمية الأمير محمد بن سلمان الملكية» | Sharaan is in AlUla (Madinah region) — geographic misattribution |
+| Najran «٦ طوابق تبلغها البيوت» | → «قد تبلغها» | Sources vary between 4 and 7 storeys |
+| 1953 «أول هيكلٍ حكومي حديث» | → «ركيزة مؤسسية في بناء حكومة الدولة الحديثة» | "First" contestable (earlier councils existed) |
+
+**Editorial vs factual separation:** campaign language lives only in
+`quote`/`story` fields («من الحكاية»); sourced claims live only in «بالأرقام»
+cards, facts and stats blocks, each with a source chip. No editorial line
+carries a source label; no sourced figure sits inside story prose.
+
+**Flagged for a product decision (not changed):** the Pulse section's
+simulated live counter and "MOST SELECTED TRAIT" panel display unsourced
+simulation as if live.
+
+### 3.6 Reviewed and deliberately kept
 
 - «أكبر واحة نخيل في العالم» (الأحساء) — UNESCO's own inscription language, sourced.
 - «أول جامعة في المملكة» (KSU 1957) — verified, sourced.
